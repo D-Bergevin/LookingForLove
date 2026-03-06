@@ -1,13 +1,9 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
-import ProfileTest from "./components/ProfileTest"
+import ProfileEdit from "./components/ProfileEdit.jsx"
+import ProfileView from './components/ProfileView.jsx'
 
 function App() {
-  const [count, setCount] = useState(0)
-
-  return <ProfileTest />
+  return <ProfileView />
 
   //old test return 
 /*
