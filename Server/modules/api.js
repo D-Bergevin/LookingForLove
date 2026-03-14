@@ -31,7 +31,9 @@ app.get('/profiles', async (_request, response) => {
 
 app.get('/profiles/:username', async (request,response) => {
     try {
-        let profile = await retrieveProfile(request.params.username);
+        const profileUsername = request.params.username;
+
+        let profile = await retrieveProfile(profileUsername);
 
         if (profile) {
             response.json(profile);
