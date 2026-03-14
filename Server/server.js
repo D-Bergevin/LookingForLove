@@ -12,8 +12,6 @@ try {
     // Initialize the database
     console.log(env);
     db = await initDatabase(env.DB_URI);
-
-    
 }
 catch (e) {
     console.error(e);
