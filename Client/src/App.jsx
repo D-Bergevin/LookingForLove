@@ -1,9 +1,10 @@
 import './App.css'
+import ProfileCreate from './components/ProfileCreate.jsx'
 import ProfileEdit from "./components/ProfileEdit.jsx"
 import ProfileView from './components/ProfileView.jsx'
 
 function App() {
-  return <ProfileView />
+  return <ProfileEdit id={0}/>
 
   //old test return 
 /*
