@@ -30,10 +30,8 @@ app.get('/profiles', async (_request, response) => {
 });
 
 app.get('/profiles/:username', async (request,response) => {
-    const profileUsername = request.params.username;
-
     try {
-        let profile = await retrieveProfile(profileUsername);
+        let profile = await retrieveProfile(request.params.username);
 
         if (profile) {
             response.json(profile);
@@ -45,7 +43,6 @@ app.get('/profiles/:username', async (request,response) => {
         console.error(e);
         response.sendStatus(500);
     }
-
 });
 
 const startServer = (port) => {

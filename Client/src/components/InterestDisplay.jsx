@@ -1,7 +1,11 @@
-function InterestDisplay({ interest }) {
+function InterestDisplay(props) {
     return (
         <div className="interest">
-            <span>{interest.name}</span>
+            <span>{props.interest.name}</span>
+            <span className="remove-button" onClick={() => {
+                //LF: Remove interest from interests array in ProfileCreate if x button is clicked.
+                props.setInterests(prevInterests => prevInterests.filter(interest => interest.id !== props.interest.id));
+            }}> X</span>
         </div>
     );
 }//LF: WIP! Placeholder for interest display. Needs X button for removing interest and styling.
