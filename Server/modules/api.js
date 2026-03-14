@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { retrieveProfiles, retrieveProfile } from './data.js';
+import { retrieveProfiles, retrieveProfile, addNewProfile } from './data.js';
 
 // The Express application object
 const app = express();
@@ -40,6 +40,27 @@ app.get('/profiles/:username', async (request,response) => {
         }
     }
     catch (e) {
+        console.error(e);
+        response.sendStatus(500);
+    }
+});
+
+app.post('/register', async (request, response) => {
+    const newProfile = request.body;
+
+    try {
+            let result = await addNewProfile(newProfile);
+            if (result = "Duplicate")
+            {
+                response.sendStatus(400);
+            }
+            else
+            {
+                response.json(result);
+            }
+    }
+    catch (e)
+    {
         console.error(e);
         response.sendStatus(500);
     }
