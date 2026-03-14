@@ -9,8 +9,6 @@ let db = undefined;
 try {
     // Initialize the database
     db = await initDatabase(env.DB_URI);
-
-    
 }
 catch (e) {
     console.error(e);

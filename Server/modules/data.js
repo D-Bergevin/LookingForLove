@@ -79,9 +79,60 @@ const addNewProfile = async(profile) => {
 }
 
 
+const updatePartialProfile = async(criteria, update) => {
+    let context = undefined;
+    let result = undefined
+    try {
+        // Initialize the database
+        context = await db.initDatabase(env.DB_URI);
+
+        let existingProfile = await db.findDocument(context,DATABASE_NAME,COLLECTION_NAME, criteria)
+
+        if (!existingProfile)
+        {
+            console.error("ERROR: Profile does not exist.");
+            result = "NotFound";
+        }
+        else
+        {
+            let testEmail = await db.findDocument(context,DATABASE_NAME,COLLECTION_NAME, {email: update.email})
+
+            if (!testEmail)
+            {
+                if (update.username)
+                {
+                    console.error("ERROR: Cannot update username.");
+                    result = "Username";
+                }
+                else
+                {
+                    result = await db.updateDocument(context, DATABASE_NAME, COLLECTION_NAME, criteria, update)
+                }
+            }
+            else
+            {
+                console.error("ERROR: Profile already exists.");
+                result = "Duplicate";
+            }
+
+            
+        }
+    }
+    catch (e) {
+        console.error(e);
+    }
+    finally {
+        context?.close();
+    }
+
+    return result;
+}
+
+
 export {
     DATABASE_NAME,
     retrieveProfiles,
     retrieveProfile,
-    addNewProfile
+    addNewProfile,
+    updatePartialProfile
 };

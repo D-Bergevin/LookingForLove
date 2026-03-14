@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { retrieveProfiles, retrieveProfile, addNewProfile } from './data.js';
+import { retrieveProfiles, retrieveProfile, addNewProfile, updatePartialProfile } from './data.js';
 
 // The Express application object
 const app = express();
@@ -53,7 +53,7 @@ app.post('/register', async (request, response) => {
 
     try {
             let result = await addNewProfile(newProfile);
-            if (result = "Duplicate")
+            if (result === "Duplicate")
             {
                 response.sendStatus(400);
             }
@@ -61,6 +61,42 @@ app.post('/register', async (request, response) => {
             {
                 response.json(result);
             }
+    }
+    catch (e)
+    {
+        console.error(e);
+        response.sendStatus(500);
+    }
+});
+
+app.put('/update', async (request,response) => {
+    const criteria = request.body.criteria;
+    const update = request.body.update;
+
+    if (!criteria || !update) 
+    {
+        return response.status(400).send("Missing criteria or update");
+    }
+
+    try {
+        const result = await updatePartialProfile(criteria, update);
+
+        if (result === "NotFound")
+        {
+            response.sendStatus(404);
+        }
+        else if (result === "Duplicate")
+        {
+            response.sendStatus(409);
+        }
+        else if (result === "Username")
+        {
+            response.sendStatus(400);
+        }
+        else
+        {
+            response.json(result);
+        }
     }
     catch (e)
     {
