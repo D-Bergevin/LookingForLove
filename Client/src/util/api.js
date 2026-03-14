@@ -19,7 +19,15 @@ const profile = {
             method: 'POST'
         });
         return response;
-    }
+    },
+    //TODO: Server team, implement client side route
+    // async getUser(id){
+    //     let response = await fetch(serverRoute(`user/${id}`), {
+    //         headers,
+    //         method: 'GET'
+    //     });
+    //     return response;
+    // }
 }
 
 export {
