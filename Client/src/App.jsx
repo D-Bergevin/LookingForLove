@@ -4,7 +4,7 @@ import ProfileEdit from "./components/ProfileEdit.jsx"
 import ProfileView from './components/ProfileView.jsx'
 
 function App() {
-  return <ProfileEdit id={0}/>
+  return <ProfileEdit username={"TProf"}/>
 
   //old test return 
 /*

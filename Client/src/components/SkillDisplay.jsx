@@ -1,10 +1,10 @@
 function SkillDisplay(props) {
     return (
         <div className="skill">
-            <span>{props.skill.name}</span>
+            <span>{props.skill}</span>
             <span className="remove-button" onClick={() => {
                 //LF: Remove skill from skills array in ProfileCreate if x button is clicked.
-                props.setSkills(prevSkills => prevSkills.filter(skill => skill.id !== props.skill.id));
+                props.setSkills(prevSkills => prevSkills.filter(skill => skill !== props.skill));
             }}> X</span>
         </div>
     );

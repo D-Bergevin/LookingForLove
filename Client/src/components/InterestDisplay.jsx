@@ -1,10 +1,10 @@
 function InterestDisplay(props) {
     return (
         <div className="interest">
-            <span>{props.interest.name}</span>
+            <span>{props.interest}</span>
             <span className="remove-button" onClick={() => {
                 //LF: Remove interest from interests array in ProfileCreate if x button is clicked.
-                props.setInterests(prevInterests => prevInterests.filter(interest => interest.id !== props.interest.id));
+                props.setInterests(prevInterests => prevInterests.filter(interest => interest !== props.interest));
             }}> X</span>
         </div>
     );
