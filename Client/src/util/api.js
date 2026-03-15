@@ -20,14 +20,14 @@ const profile = {
         });
         return response;
     },
-    //TODO: Server team, implement client side route
-    // async getUser(id){
-    //     let response = await fetch(serverRoute(`user/${id}`), {
-    //         headers,
-    //         method: 'GET'
-    //     });
-    //     return response;
-    // }
+    async getUser(username){
+        let response = await fetch(serverRoute(`profiles/${username}`), {
+            headers,
+            method: 'GET'
+        });
+        let data = await response.json();
+        return data;
+    }
 }
 
 export {

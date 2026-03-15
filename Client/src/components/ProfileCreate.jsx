@@ -35,20 +35,20 @@ function ProfileCreate(){
         <input type="text" placeholder="Last Name" onChange={(e) => setUser({...user, lastName: e.target.value})}/>
 
         <label >Skills</label>
-        {skills.map(skill => <SkillDisplay key={skill.id} skill={skill} setSkills={setSkills} />)}
+        {skills.map((skill, i = 0) => <SkillDisplay key={i++} skill={skill} setSkills={setSkills} />)}
         <input type="text" placeholder="Add skill"/>
         <button type="button" onClick={() => {//LF: Add interest function which adds the interest in the input field to the interests array in state and then clear the input and update the display, All interests will be added to user on save profile.
-            const skill = {id: skills.length-1/*LF: Returns 0 if array is empty, otherwise returns index of element to be inserted */, name: document.querySelector('input[placeholder="Add skill"]').value};
+            const skill = document.querySelector('input[placeholder="Add skill"]').value;
             if(skill.name === "") return;//LF: Don't add empty skills.
             setSkills([...skills, skill]);
             document.querySelector('input[placeholder="Add skill"]').value = "";
         }}>Add Skill</button>
 
         <label >Interests</label>
-        {interests.map(interest => <InterestDisplay key={interest.id} interest={interest} setInterests={setInterests} />)}
+        {interests.map((interest, i=0) => <InterestDisplay key={i++} interest={interest} setInterests={setInterests} />)}
         <input type="text" placeholder="Add interest"/>
         <button type="button" onClick={() => {//LF: Add interest function which adds the interest in the input field to the interests array in state and then clear the input and update the display, All interests will be added to user on save profile.
-            const interest = {id: interests.length-1/*LF: Returns 0 if array is empty, otherwise returns index of element to be inserted */, name: document.querySelector('input[placeholder="Add interest"]').value};
+            const interest = document.querySelector('input[placeholder="Add interest"]').value;
             if(interest.name === "") return;//LF: Don't add empty interests.
             setInterests([...interests, interest]);
             document.querySelector('input[placeholder="Add interest"]').value = "";
