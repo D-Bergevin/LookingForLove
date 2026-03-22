@@ -1,11 +1,12 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
-
+import ProfileCreate from './components/ProfileCreate.jsx'
+import ProfileEdit from "./components/ProfileEdit.jsx"
+import ProfileView from './components/ProfileView.jsx'
 function App() {
-  const [count, setCount] = useState(0)
+  return <ProfileEdit user={{username:"TProf",email:"tprofile@email.com",password:"ThisIsAPassword",firstname:"Testing",lastname:"Profile",skills:["Testing","Skill 1"],interests:["Test","IT"],location:{Country:"Canada",Region:"Ontario",City:"London",Address:"123 Street Rd."},employment:{workplace:"Job Ltd.",position:"IT"},privacyLevel:0}}/>
 
+  //old test return 
+/*
   return (
     <>
       <div>
@@ -30,6 +31,7 @@ function App() {
       </p>
     </>
   )
+  */ 
 }
 
 export default App
