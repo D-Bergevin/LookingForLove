@@ -1,13 +1,21 @@
 import express from "express";
 import cors from "cors";
-import { retrieveProfiles, retrieveProfile, addNewProfile, updatePartialProfile } from './data.js';
+import jwt from "jsonwebtoken";
+import env from "./env.js";
+import {
+    retrieveProfiles,
+    retrieveProfile,
+    addNewProfile,
+    authenticateProfile,
+    updatePartialProfile
+} from './data.js';
 
 // The Express application object
 const app = express();
 
 // Configure Express APIs Middleware
-app.use(express.json()); // Parse JSON bodies
-app.use(cors()); // Handle CORS headers
+app.use(express.json());
+app.use(cors());
 
 app.use((req, _res, next) => {
     const timestamp = new Date(Date.now());
@@ -18,18 +26,35 @@ app.use((req, _res, next) => {
     console.log('body:', req.body);
     next();
 });
+const authenticateToken = (request, response, next) => {
+    const authHeader = request.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1];
 
+    if (!token) {
+        return response.sendStatus(401);
+    }
+
+    try {
+        const decoded = jwt.verify(token, env.JWT_SECRET);
+        request.user = decoded;
+        next();
+    }
+    catch (e) {
+        console.error("TOKEN ERROR:", e);
+        return response.sendStatus(403);
+    }
+};
 // Endpoint Definitions
 app.get('/about', (_request, response) => {
     response.sendFile("package.json", { root: '.' });
 });
 
-app.get('/profiles', async (_request, response) => {
+app.get('/profiles', authenticateToken, async (_request, response) => {
     let profiles = await retrieveProfiles();
     response.json(profiles);
 });
 
-app.get('/profiles/:username', async (request,response) => {
+app.get('/profiles/:username', authenticateToken, async (request, response) => {
     try {
         const profileUsername = request.params.username;
 
@@ -38,7 +63,7 @@ app.get('/profiles/:username', async (request,response) => {
         if (profile) {
             response.json(profile);
         } else {
-            response.status(404).json({ error: "Profile not found" }); 
+            response.status(404).json({ error: "Profile not found" });
         }
     }
     catch (e) {
@@ -51,61 +76,88 @@ app.post('/register', async (request, response) => {
     const newProfile = request.body;
 
     try {
-            let result = await addNewProfile(newProfile);
-            if (result === "Duplicate")
-            {
-                response.sendStatus(400);
-            }
-            else
-            {
-                response.json(result);
-            }
+        let result = await addNewProfile(newProfile);
+
+        if (result === "Duplicate") {
+            response.sendStatus(400);
+        }
+        else {
+            response.json(result);
+        }
     }
-    catch (e)
-    {
+    catch (e) {
         console.error(e);
         response.sendStatus(500);
     }
 });
 
-app.put('/update', async (request,response) => {
+app.post('/login', async (request, response) => {
+    const { identifier, password } = request.body;
+
+    if (!identifier || !password) {
+        return response.status(400).json({ error: "Missing identifier or password" });
+    }
+
+    try {
+        const user = await authenticateProfile(identifier, password);
+
+        if (!user) {
+            return response.status(401).json({ error: "Invalid credentials" });
+        }
+
+        const token = jwt.sign(
+            {
+                username: user.username,
+                email: user.email
+            },
+            env.JWT_SECRET,
+            { expiresIn: "1h" }
+        );
+
+        response.json({
+            message: "Login successful",
+            token,
+            user
+        });
+    }
+    catch (e) {
+        console.error("LOGIN ERROR:", e);
+        response.sendStatus(500);
+    }
+});
+
+app.put('/update', authenticateToken, async (request, response) => {
     const criteria = request.body.criteria;
     const update = request.body.update;
 
-    if (!criteria || !update) 
-    {
+    if (!criteria || !update) {
         return response.status(400).send("Missing criteria or update");
     }
 
     try {
         const result = await updatePartialProfile(criteria, update);
 
-        if (result === "NotFound")
-        {
+        if (result === "NotFound") {
             response.sendStatus(404);
         }
-        else if (result === "Duplicate")
-        {
+        else if (result === "Duplicate") {
             response.sendStatus(409);
         }
-        else if (result === "Username")
-        {
+        else if (result === "Username") {
             response.sendStatus(400);
         }
-        else
-        {
+        else {
             response.json(result);
         }
     }
-    catch (e)
-    {
+    catch (e) {
         console.error(e);
         response.sendStatus(500);
     }
 });
 
 const startServer = (port) => {
-    app.listen(port, console.warn(`Listening on port ${port}`));
+    app.listen(port, () => console.warn(`Listening on port ${port}`));
 };
 
 console.log('Completed API setup.');
