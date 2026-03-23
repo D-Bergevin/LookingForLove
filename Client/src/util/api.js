@@ -19,6 +19,14 @@ const profile = {
             method: 'POST'
         });
         return response;
+    },
+    async getUser(username){
+        let response = await fetch(serverRoute(`profiles/${username}`), {
+            headers,
+            method: 'GET'
+        });
+        let data = await response.json();
+        return data;
     }
 }
 
