@@ -127,12 +127,17 @@ app.post('/login', async (request, response) => {
 });
 
 app.put('/update', authenticateToken, async (request, response) => {
-    const criteria = request.body.criteria;
     const update = request.body.update;
 
-    if (!criteria || !update) {
-        return response.status(400).send("Missing criteria or update");
+    if (!update) {
+        return response.status(400).send("Missing update");
     }
+
+    if (update.username) {
+        return response.status(400).json({ error: "Cannot update username" });
+    }
+
+    const criteria = { username: request.user.username };
 
     try {
         const result = await updatePartialProfile(criteria, update);
