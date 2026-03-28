@@ -7,7 +7,8 @@ import {
     retrieveProfile,
     addNewProfile,
     authenticateProfile,
-    updatePartialProfile
+    updatePartialProfile,
+    retrieveProfilesByInterest
 } from './data.js';
 
 // The Express application object
@@ -51,6 +52,11 @@ app.get('/about', (_request, response) => {
 
 app.get('/profiles', authenticateToken, async (_request, response) => {
     let profiles = await retrieveProfiles();
+    response.json(profiles);
+});
+
+app.get('/profilesbyinterest/:username', authenticateToken, async (_request, response) => {
+    let profiles = await retrieveProfilesByInterest(_request.params.username);
     response.json(profiles);
 });
 

@@ -31,6 +31,37 @@ const retrieveProfiles = async () => {
     return profiles;
 };
 
+const retrieveProfilesByInterest = async (userUsername) => {
+    let profiles = [];
+    let context = undefined;
+
+    let userProfile = await retrieveProfile(userUsername);
+
+    try {
+        context = await db.initDatabase(env.DB_URI);
+
+        profiles = await db.findDocuments(
+            context,
+            DATABASE_NAME,
+            COLLECTION_NAME,
+            {interests: {$in: userProfile.interests}, username: {$ne: userProfile.username}},
+            { _id: 0, passwordHash: 0 }
+        );
+
+
+
+
+    }
+    catch (e) {
+        console.error(e);
+    }
+    finally {
+        context?.close();
+    }
+
+    return profiles;
+};
+
 const retrieveProfile = async (profileUsername) => {
     let profile = null;
     let context = undefined;
@@ -213,6 +244,7 @@ export {
     DATABASE_NAME,
     retrieveProfiles,
     retrieveProfile,
+    retrieveProfilesByInterest,
     addNewProfile,
     authenticateProfile,
     updatePartialProfile
