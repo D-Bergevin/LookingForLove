@@ -76,6 +76,49 @@ const retrieveProfile = async (profileUsername) => {
             { username: profileUsername },
             { _id: 0, passwordHash: 0 }
         );
+
+        if (profile)
+        {
+            const privacyLevel = profile.privacyLevel;
+
+            switch (privacyLevel)
+            {
+                case 0:
+                    profile = {
+                        username: profile.username, 
+                        firstName: profile.firstName, 
+                        lastName: profile.lastName, 
+                        email: profile.email,
+                        interests: profile.interests, 
+                        skills: profile.skills, 
+                        datingPreference: profile.datingPreference, 
+                        displayedGender: profile.displayerGender,
+                        location: profile.location,
+                        employment: profile.employment
+                    };
+                    break;
+                case 1:
+                    profile = {
+                        username: profile.username, 
+                        firstName: profile.firstName, 
+                        lastName: profile.lastName, 
+                        interests: profile.interests, 
+                        skills: profile.skills, 
+                        datingPreference: profile.datingPreference, 
+                        displayedGender: profile.displayerGender
+                    };
+                    break;
+                case 2:
+                    profile = {
+                        username: profile.username, 
+                        firstName: profile.firstName,
+                        interests: profile.interests, 
+                        skills: profile.skills, 
+                        datingPreference: profile.datingPreference, 
+                        displayedGender: profile.displayerGender
+                    }
+            }
+        }
     }
     catch (e) {
         console.error(e);
