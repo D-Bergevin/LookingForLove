@@ -25,3 +25,9 @@ Currently, the Server is able to respond to requests with all information necess
 **Client**
 
 In the current build, the Client has a UI, but no functionality with the server-side has been implemented.
+
+**Required to Function**
+
+There is a .env file not included in the repository that holds sensitive information, including the hash string and database credentials.
+When cloning from the repository and attempting to test the build, the user will need to run "npm install" in the command line in both the
+"/Server" and "/Client" directories, as that will install modules included in the package.json.
