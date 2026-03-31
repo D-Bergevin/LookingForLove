@@ -245,12 +245,18 @@ const updatePartialProfile = async (criteria, update) => {
             result = "NotFound";
         }
         else {
-            let testEmail = await db.findDocument(
+
+            let testEmail = null;
+            
+            if (update.email)
+            {
+                testEmail = await db.findDocument(
                 context,
                 DATABASE_NAME,
                 COLLECTION_NAME,
                 { email: update.email }
-            );
+                );
+        }   
 
             if (!testEmail) {
                 if (update.username) {
