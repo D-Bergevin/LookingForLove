@@ -1,0 +1,21 @@
+{
+  "name": "looking-for-love",
+  "version": "1.0.0",
+  "description": "INFO-3112 Project Server",
+  "license": "ISC",
+  "author": "Dominic Bergevin",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "server": "node server",
+    "watch": "node --watch server"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongodb": "^7.1.0"
+  }
+}
