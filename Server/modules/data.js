@@ -44,7 +44,7 @@ const retrieveProfilesByInterest = async (userUsername) => {
             context,
             DATABASE_NAME,
             COLLECTION_NAME,
-            {interests: {$in: userProfile.interests}, username: {$ne: userProfile.username}},
+            { interests: { $in: userProfile.interests }, username: { $ne: userProfile.username } },
             { _id: 0, passwordHash: 0 }
         );
 
@@ -77,45 +77,44 @@ const retrieveProfile = async (profileUsername) => {
             { _id: 0, passwordHash: 0 }
         );
 
-        if (profile)
-        {
+        if (profile) {
             const privacyLevel = profile.privacyLevel;
 
-            switch (privacyLevel)
-            {
+            //changed lastname to lastName in all instances please continue with this camelcase format moving forward
+            switch (privacyLevel) {
                 case 0:
                     profile = {
-                        username: profile.username, 
-                        firstName: profile.firstName, 
-                        lastName: profile.lastName, 
+                        username: profile.username,
+                        firstName: profile.firstName,
+                        lastName: profile.lastName,
                         email: profile.email,
-                        interests: profile.interests, 
-                        skills: profile.skills, 
-                        datingPreference: profile.datingPreference, 
-                        displayedGender: profile.displayerGender,
+                        interests: profile.interests,
+                        skills: profile.skills,
+                        datingPreference: profile.datingPreference,
+                        displayedGender: profile.displayedGender,
                         location: profile.location,
                         employment: profile.employment
                     };
                     break;
                 case 1:
                     profile = {
-                        username: profile.username, 
-                        firstName: profile.firstName, 
-                        lastName: profile.lastName, 
-                        interests: profile.interests, 
-                        skills: profile.skills, 
-                        datingPreference: profile.datingPreference, 
-                        displayedGender: profile.displayerGender
+                        username: profile.username,
+                        firstName: profile.firstName,
+                        lastName: profile.lastName,
+                        interests: profile.interests,
+                        skills: profile.skills,
+                        datingPreference: profile.datingPreference,
+                        displayedGender: profile.displayedGender
                     };
                     break;
                 case 2:
                     profile = {
-                        username: profile.username, 
+                        username: profile.username,
                         firstName: profile.firstName,
-                        interests: profile.interests, 
-                        skills: profile.skills, 
-                        datingPreference: profile.datingPreference, 
-                        displayedGender: profile.displayerGender
+                        interests: profile.interests,
+                        skills: profile.skills,
+                        datingPreference: profile.datingPreference,
+                        displayedGender: profile.displayedGender
                     }
             }
         }

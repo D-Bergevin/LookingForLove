@@ -45,11 +45,11 @@ const profile = {
     },
 
     async createProfile(user) {
-    
+
         const body = {
             email: user.email,
-            firstname: user.firstname,
-            lastname: user.lastname,
+            firstName: user.firstName,
+            lastName: user.lastName,
             skills: user.skills,
             interests: user.interests,
             location: user.location,
@@ -77,8 +77,8 @@ const profile = {
         const body = {
             update: {
                 email: user.email,
-                firstname: user.firstname,
-                lastname: user.lastname,
+                firstName: user.firstName,
+                lastName: user.lastName,
                 skills: user.skills,
                 interests: user.interests,
                 location: user.location,
