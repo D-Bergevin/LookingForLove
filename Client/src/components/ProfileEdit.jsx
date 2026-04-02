@@ -1,17 +1,13 @@
 import "./ProfileTest.css";
 import InterestDisplay from "./InterestDisplay.jsx";
 import SkillDisplay from "./SkillDisplay.jsx";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import * as api from "../util/api.js";
 
 function ProfileEdit(props) {
   const [tempUser, setTempUser] = useState(props.user);
-
-  useEffect(() => {
-    setTempUser(props.user);
-  }, [props.user]);
-
+  const [existingUser, setExistingUser] = useState(props.user);
   const [newSkill, setNewSkill] = useState("");
   const [newInterest, setNewInterest] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,22 +15,25 @@ function ProfileEdit(props) {
   const saveProfile = async () => {
     setLoading(true);
     try {
-      if (tempUser.newPassword && tempUser.newPassword !== tempUser.confirmNewPassword) {
+      if(tempUser.newPassword && tempUser.newPassword !== tempUser.confirmNewPassword) {
         toast.error("New password and confirm password do not match");
         setLoading(false);
         return;
       }
-
-      const data = await api.profile.updateProfile(tempUser);
-
-      //console log for debugging
-      //console.log(tempUser);
-
-      if (data) {
-        toast.success("Profile saved successfully!");
-      } else {
-        toast.error("Failed to save profile");
+      if(tempUser.confirmNewPassword === tempUser.newPassword) {
+        tempUser.password = tempUser.confirmNewPassword;
       }
+      let data = null;
+      if(JSON.stringify(existingUser) !== JSON.stringify(tempUser)) {
+         data = await api.profile.updateProfile(tempUser);
+      } else {
+         data = await api.profile.createProfile(tempUser);
+      }
+     if(data){
+      toast.success("Profile saved successfully!");
+     } else {
+       toast.error("Failed to save profile");
+     }
     } catch (e) {
       toast.error(e.message || "Failed to save profile");
     } finally {
@@ -42,9 +41,6 @@ function ProfileEdit(props) {
     }
   };
 
-  if (!tempUser) {
-    return <div className="spinner">Loading Profile...</div>;
-  }
   return (
     <div className="container">
       <h2>Edit Profile</h2>
@@ -52,67 +48,62 @@ function ProfileEdit(props) {
       {loading && <div className="spinner">Saving...</div>}
 
       <form className="form">
+        {/* Username */}
         <label>Username</label>
         <input
           type="text"
-          value={tempUser.username}
+          defaultValue={props.user.username}
           onChange={(e) =>
             setTempUser({ ...tempUser, username: e.target.value })
           }
         />
 
+        {/* Email */}
         <label>Email</label>
         <input
           type="text"
-          value={tempUser.email}
+          defaultValue={props.user.email}
           onChange={(e) =>
             setTempUser({ ...tempUser, email: e.target.value })
           }
         />
-        {/* PassWords */}
+
+        {/* Passwords */}
         <label>Old Password</label>
-        <input
-          type="password"
-          placeholder="Password"
-          onChange={(e) =>
+        <input type="password" placeholder="Password" 
+           onChange={(e) =>
             setTempUser({ ...tempUser, password: e.target.value })
-          }
-        />
+          }/>
 
         <label>New Password</label>
-        <input
-          type="password"
-          placeholder="NewPassword"
+        <input type="password" placeholder="NewPassword"
           onChange={(e) =>
             setTempUser({ ...tempUser, newPassword: e.target.value })
           }
-        />
+         />
 
         <label>Confirm New Password</label>
-        <input
-          type="password"
-          placeholder="ConfirmNewPassword"
-          onChange={(e) =>
+        <input type="password" placeholder="ConfirmNewPassword" 
+           onChange={(e) =>
             setTempUser({ ...tempUser, confirmNewPassword: e.target.value })
-          }
-        />
+          }/>
 
-        {/* First and Last Names */}
+        {/* First & Last Name */}
         <label>First Name</label>
         <input
           type="text"
-          value={tempUser.firstName}
+          defaultValue={props.user.firstname}
           onChange={(e) =>
-            setTempUser({ ...tempUser, firstName: e.target.value })
+            setTempUser({ ...tempUser, firstname: e.target.value })
           }
         />
 
         <label>Last Name</label>
         <input
           type="text"
-          value={tempUser.lastName}
+          defaultValue={props.user.lastname}
           onChange={(e) =>
-            setTempUser({ ...tempUser, lastName: e.target.value })
+            setTempUser({ ...tempUser, lastname: e.target.value })
           }
         />
 
@@ -152,6 +143,7 @@ function ProfileEdit(props) {
         >
           Add Skill
         </button>
+
         {/* Interests */}
         <label>Interests</label>
         {tempUser?.interests?.map((interest, i) => (
@@ -188,11 +180,12 @@ function ProfileEdit(props) {
         >
           Add Interest
         </button>
+
         {/* Location */}
         <label>Country</label>
         <input
           type="text"
-          value={tempUser.location.Country}
+          defaultValue={props.user.location.Country}
           onChange={(e) =>
             setTempUser({
               ...tempUser,
@@ -204,7 +197,7 @@ function ProfileEdit(props) {
         <label>Region</label>
         <input
           type="text"
-          value={tempUser.location.Region}
+          defaultValue={props.user.location.Region}
           onChange={(e) =>
             setTempUser({
               ...tempUser,
@@ -216,7 +209,7 @@ function ProfileEdit(props) {
         <label>Address</label>
         <input
           type="text"
-          value={tempUser.location.Address}
+          defaultValue={props.user.location.Address}
           onChange={(e) =>
             setTempUser({
               ...tempUser,
@@ -225,11 +218,11 @@ function ProfileEdit(props) {
           }
         />
 
-        {/* Work Info */}
+        {/* Employment */}
         <label>Workplace</label>
         <input
           type="text"
-          value={tempUser.employment.workplace}
+          defaultValue={props.user.employment.workplace}
           onChange={(e) =>
             setTempUser({
               ...tempUser,
@@ -241,7 +234,7 @@ function ProfileEdit(props) {
         <label>Position</label>
         <input
           type="text"
-          value={tempUser.employment.position}
+          defaultValue={props.user.employment.position}
           onChange={(e) =>
             setTempUser({
               ...tempUser,
@@ -250,16 +243,17 @@ function ProfileEdit(props) {
           }
         />
 
-        {/* Other */}
+        {/* Privacy Level */}
         <label>Privacy Level</label>
         <input
           type="number"
-          value={tempUser.privacyLevel}
+          defaultValue={props.user.privacyLevel}
           onChange={(e) =>
             setTempUser({ ...tempUser, privacyLevel: Number(e.target.value) })
           }
         />
 
+        {/* Displayed Gender */}
         <label>Displayed Gender</label>
         <select
           value={tempUser.displayedGender || ""}
@@ -273,6 +267,7 @@ function ProfileEdit(props) {
           <option value="O">Other</option>
         </select>
 
+        {/* Dating Preference */}
         <label>Dating Preference</label>
         <select
           value={tempUser.datingPreference || ""}
@@ -286,6 +281,7 @@ function ProfileEdit(props) {
           <option value="A">All</option>
         </select>
 
+        {/* Action Buttons */}
         <button type="button" onClick={saveProfile}>
           Save Profile
         </button>
