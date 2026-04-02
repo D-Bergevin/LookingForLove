@@ -6,7 +6,11 @@ import toast from "react-hot-toast";
 import * as api from "../util/api.js";
 
 function ProfileEdit(props) {
-  const [tempUser, setTempUser] = useState(props.user);
+  const [tempUser, setTempUser] = useState({
+    ...props.user,
+    firstName: props.user.firstName || props.user.firstname || "",
+    lastName: props.user.lastName || props.user.lastname || "",
+  });
   const [existingUser, setExistingUser] = useState(props.user);
   const [newSkill, setNewSkill] = useState("");
   const [newInterest, setNewInterest] = useState("");
@@ -17,6 +21,10 @@ function ProfileEdit(props) {
     try {
       if(tempUser.newPassword && tempUser.newPassword !== tempUser.confirmNewPassword) {
         toast.error("New password and confirm password do not match");
+        setLoading(false);
+        return;
+      } else if(tempUser.newPassword === "" || tempUser.newPassword === null || tempUser.confirmNewPassword === "" || tempUser.confirmNewPassword === null ) {
+        toast.error("New password and confirm password is required");
         setLoading(false);
         return;
       }
@@ -92,18 +100,18 @@ function ProfileEdit(props) {
         <label>First Name</label>
         <input
           type="text"
-          defaultValue={props.user.firstname}
+           value={tempUser.firstName || ""}
           onChange={(e) =>
-            setTempUser({ ...tempUser, firstname: e.target.value })
+            setTempUser({ ...tempUser, firstName: e.target.value })
           }
         />
 
         <label>Last Name</label>
         <input
           type="text"
-          defaultValue={props.user.lastname}
+          value={tempUser.lastName || ""}
           onChange={(e) =>
-            setTempUser({ ...tempUser, lastname: e.target.value })
+            setTempUser({ ...tempUser, lastName: e.target.value })
           }
         />
 

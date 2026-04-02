@@ -1,14 +1,3 @@
-// import './App.css'
-// import ProfileCreate from './components/ProfileCreate.jsx'
-// import ProfileEdit from "./components/ProfileEdit.jsx"
-// import ProfileView from './components/ProfileView.jsx'
-// function App() {
-//   return <ProfileEdit user={{username:"TProf",email:"tprofile@email.com",password:"ThisIsAPassword",firstname:"Testing",lastname:"Profile",skills:["Testing","Skill 1"],interests:["Test","IT"],location:{Country:"Canada",Region:"Ontario",Address:"123 Street Rd."},employment:{workplace:"Job Ltd.",position:"IT"},privacyLevel:0}}/>
-
-// }
-
-// export default App;
-
 import { useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import Login from "./components/Login";
@@ -70,6 +59,7 @@ function App() {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem("authToken");
     // Clear user data & redirect to login page
     window.location.reload(); // simple reload for demo
   };
