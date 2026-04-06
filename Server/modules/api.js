@@ -5,6 +5,7 @@ import env from "./env.js";
 import {
     retrieveProfiles,
     retrieveProfile,
+    retrieveProfilesByPrivacy,
     addNewProfile,
     authenticateProfile,
     updatePartialProfile,
@@ -65,6 +66,24 @@ app.get('/profiles/:username', authenticateToken, async (request, response) => {
         const profileUsername = request.params.username;
 
         let profile = await retrieveProfile(profileUsername);
+
+        if (profile) {
+            response.json(profile);
+        } else {
+            response.status(404).json({ error: "Profile not found" });
+        }
+    }
+    catch (e) {
+        console.error(e);
+        response.sendStatus(500);
+    }
+});
+
+app.get('/profilesbyprivacy/:username', authenticateToken, async (request, response) => {
+    try {
+        const profileUsername = request.params.username;
+
+        let profile = await retrieveProfileByPrivacy(profileUsername);
 
         if (profile) {
             response.json(profile);
