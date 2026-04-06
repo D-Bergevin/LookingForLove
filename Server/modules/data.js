@@ -362,7 +362,7 @@ export {
     retrieveProfiles,
     retrieveProfile,
     retrieveProfilesByInterest,
-    retrieveProfilesByPrivacy,
+    retrieveProfileByPrivacy,
     addNewProfile,
     authenticateProfile,
     updatePartialProfile
