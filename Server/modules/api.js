@@ -5,7 +5,7 @@ import env from "./env.js";
 import {
     retrieveProfiles,
     retrieveProfile,
-    retrieveProfilesByPrivacy,
+    retrieveProfileByPrivacy,
     addNewProfile,
     authenticateProfile,
     updatePartialProfile,
