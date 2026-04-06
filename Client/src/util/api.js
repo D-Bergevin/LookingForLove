@@ -1,35 +1,129 @@
-const API_IP = 'http://localhost';//Lines 1 and 2 define constants for the API server's IP and PORT
+const API_IP = 'http://localhost';
 const API_PORT = 9000;
 
-const headers = {//Lines 4 to 11 define a basic header to add to requests
-    // https://www.rfc-editor.org/rfc/rfc7231#section-5.3.2
-    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept
+const headers = {
     'Accept': '*/*',
-    // https://www.rfc-editor.org/rfc/rfc7231#section-3.1.1.5
-    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type
     'Content-Type': 'application/json'
-}
-//Line 13 defines a function that builds the URL of the endpoint given a route 
+};
+
 const serverRoute = (route) => `${API_IP}:${API_PORT}/${route}`;
 
 const profile = {
-    async saveUser(user){
-        let response = await fetch(serverRoute(`users/${user}`), {
+    async signup(user) {
+        const res = await fetch(serverRoute('register'), {
+            method: 'POST',
             headers,
-            method: 'POST'
+            body: JSON.stringify(user)
         });
-        return response;
+        const data = await res.json();
+        if (!res.ok) throw new Error('Signup failed - Email & Username already taken');
+        return data;
     },
-    async getUser(username){
-        let response = await fetch(serverRoute(`profiles/${username}`), {
-            headers,
-            method: 'GET'
+
+    async login(user) {
+        const res = await fetch(serverRoute('login'), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                identifier: user.username,  // or email
+                password: user.password
+            })
         });
-        let data = await response.json();
+
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.error || 'Login failed');
+        }
+
+        const data = await res.json();
+        // Optionally store token in localStorage/sessionStorage
+        localStorage.setItem('authToken', data.token);
+
+        return data.user;  // return the authenticated user info
+    },
+
+    async createProfile(user) {
+
+        const body = {
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            skills: user.skills,
+            interests: user.interests,
+            location: user.location,
+            employment: user.employment,
+            privacyLevel: user.privacyLevel,
+            displayedGender: user.displayedGender,
+            datingPreference: user.datingPreference,
+            password: user.password,
+            username: user.username
+        };
+
+        const res = await fetch(serverRoute('register'), {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(body)
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error('Profile failed to create');
+        return data;
+    },
+
+    async updateProfile(user) {
+        const token = localStorage.getItem('authToken');
+        const body = {
+            update: {
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                skills: user.skills,
+                interests: user.interests,
+                location: user.location,
+                employment: user.employment,
+                privacyLevel: user.privacyLevel,
+                displayedGender: user.displayedGender,
+                datingPreference: user.datingPreference,
+                password: user.password,
+            }
+        };
+
+        const res = await fetch(serverRoute('update'), {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(body)
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Profile failed to update');
+        return data;
+    },
+
+    async getUser(username) {
+        // Get token from localStorage
+        const token = localStorage.getItem('authToken');
+
+        // Fetch user data with Authorization header
+        const res = await fetch(serverRoute(`profiles/${username}`), {
+            method: 'GET',
+            headers: {
+                ...headers, // your other headers if any
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || 'User not found');
+
         return data;
     }
-}
 
-export {
-    profile
-}
+};
+
+export { profile };
