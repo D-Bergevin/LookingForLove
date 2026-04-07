@@ -1,25 +1,36 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 import ProfileEdit from "./components/ProfileEdit";
 import { profile } from "./util/api.js";
 
-//adding for dev buttons
-import ProfileView from "./components/ProfileView.jsx"
+// dev components
+import ProfileView from "./components/ProfileView.jsx";
 import InterestDisplay from "./components/InterestDisplay.jsx";
 import SkillDisplay from "./components/SkillDisplay.jsx";
 
-
 function App() {
-  const [page, setPage] = useState("login"); // default page
+  const [page, setPage] = useState("login");
   const [user, setUser] = useState(null);
-  const [loadingUser, setLoadingUser] = useState(false);
-  //Test Interests and skills for dev buttons
-  const [testInterests, setTestInterests] = useState(["Gaming", "Music", "Travel"]);
-  const [testSkills, setTestSkills] = useState(["React", "JavaScript", "CSS"]);
+  const [loadingUser, setLoadingUser] = useState(true);
 
-  //herlper incase user info is null
+  // test data for dev buttons
+  const [testInterests, setTestInterests] = useState([
+    "Gaming",
+    "Music",
+    "Travel",
+  ]);
+  const [testSkills, setTestSkills] = useState([
+    "React",
+    "JavaScript",
+    "CSS",
+  ]);
+
+  const navButtonStyle = {
+    padding: "5px",
+  };
+
   const normalizeUser = (u) => ({
     username: u?.username || "",
     email: u?.email || "",
@@ -42,102 +53,206 @@ function App() {
     datingPreference: u?.datingPreference || "",
   });
 
-  // Fetch full profile after login
-  const fetchUserProfile = async (username) => {
+  const authToken = localStorage.getItem("authToken");
+  const isAuthenticated = !!authToken;
+
+  const fetchUserProfile = async (username, redirectToProfile = true) => {
     try {
       setLoadingUser(true);
+
       const userData = await profile.getUser(username);
-      //console logs for debuging purposes
-      console.log("Raw data", userData);
-      console.log("Normalized data", normalizeUser(userData));
-      setUser(normalizeUser(userData)); //normalizing data to handle null values
+      const normalizedUser = normalizeUser(userData);
+
+      setUser(normalizedUser);
+      localStorage.setItem("username", normalizedUser.username);
+
+      if (redirectToProfile) {
+        setPage("profile");
+      }
     } catch (e) {
+      console.error("Failed to load user profile:", e);
       toast.error(e.message || "Failed to load user profile");
+
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("username");
+      setUser(null);
+      setPage("login");
     } finally {
       setLoadingUser(false);
     }
   };
 
+  useEffect(() => {
+    const initializeSession = async () => {
+      const token = localStorage.getItem("authToken");
+      const savedUsername = localStorage.getItem("username");
+
+      if (!token) {
+        setLoadingUser(false);
+        setPage("login");
+        return;
+      }
+
+      if (savedUsername) {
+        await fetchUserProfile(savedUsername, true);
+      } else {
+        setLoadingUser(false);
+        setPage("login");
+      }
+    };
+
+    initializeSession();
+  }, []);
+
   const handleLogout = () => {
     localStorage.removeItem("authToken");
-    // Clear user data & redirect to login page
-    window.location.reload(); // simple reload for demo
+    localStorage.removeItem("username");
+    setUser(null);
+    setPage("login");
+    toast.success("Logged out successfully");
   };
+
+  if (loadingUser) {
+    return (
+      <>
+        <Toaster position="top-right" />
+        <div style={{ padding: "20px" }}>Loading...</div>
+      </>
+    );
+  }
 
   return (
     <>
-
       <Toaster position="top-right" />
 
-      {/* DEV TEST BUTTONS */}
-      <div style={{ padding: "10px", background: "#eee" }}>
-        <button onClick={() => setPage("login")}>Login</button>
-        <button onClick={() => setPage("signup")}>Signup</button>
-        <button onClick={() => setPage("profile")}>My Profile</button>
+      {/* NAVIGATION */}
+      <div
+        style={{
+          padding: "10px 16px",
+          background: "#eee",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      >
+        {!isAuthenticated ? (
+          <>
+            <button
+              onClick={() => setPage("login")}
+              style={navButtonStyle}
+            >
+              Login
+            </button>
 
-        <button onClick={() => setPage("testView")}>Test ProfileView</button>
-        <button onClick={() => setPage("testInterest")}>Test Interests</button>
-        <button onClick={() => setPage("testSkills")}>Test Skills</button>
+            <button
+              onClick={() => setPage("signup")}
+              style={navButtonStyle}
+            >
+              Signup
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={() => setPage("profile")}
+              style={navButtonStyle}
+            >
+              My Profile
+            </button>
+
+            {/* keep these only if needed for dev testing */}
+            <button
+              onClick={() => setPage("testView")}
+              style={navButtonStyle}
+            >
+              Test ProfileView
+            </button>
+
+            <button
+              onClick={() => setPage("testInterest")}
+              style={navButtonStyle}
+            >
+              Test Interests
+            </button>
+
+            <button
+              onClick={() => setPage("testSkills")}
+              style={navButtonStyle}
+            >
+              Test Skills
+            </button>
+
+            <button
+              onClick={handleLogout}
+              style={{ ...navButtonStyle, marginLeft: "auto" }}
+            >
+              Logout
+            </button>
+          </>
+        )}
       </div>
 
-      {page === "login" && (
+      {/* PUBLIC PAGES */}
+      {!isAuthenticated && page === "login" && (
         <Login
           setUser={async (u) => {
-            // After login, fetch full user profile from backend
-            await fetchUserProfile(u.username);
-            setPage("profile");
+            if (u?.username) {
+              localStorage.setItem("username", u.username);
+              await fetchUserProfile(u.username, true);
+            } else {
+              toast.error("Username not found after login");
+            }
           }}
           goToSignup={() => setPage("signup")}
         />
       )}
 
-      {page === "signup" && (
+      {!isAuthenticated && page === "signup" && (
         <Signup goToLogin={() => setPage("login")} />
       )}
 
-      {page === "profile" && (
+      {/* PROTECTED PAGES */}
+      {isAuthenticated && page === "profile" && (
         <>
           <div
             className="d-flex align-items-center"
-            style={{ position: "relative", width: "100%", backgroundColor: "blue", color: "white", padding: "15px" }}
+            style={{
+              width: "100%",
+              backgroundColor: "blue",
+              color: "white",
+              padding: "15px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxSizing: "border-box",
+            }}
           >
-            {/* Center Title */}
             <h1
               style={{
-                margin: "0 auto",
+                margin: 0,
                 textAlign: "center",
-                fontWeight: "bold"
+                fontWeight: "bold",
               }}
             >
               Looking For Love Profile Editor
             </h1>
-
-            {/* Right Button */}
-            <button
-              onClick={handleLogout}
-              className="btn btn-light"
-              style={{
-                position: "absolute",
-                right: "50px",
-                top: "0px"
-              }}
-            >
-              Logout
-            </button>
           </div>
-          {loadingUser ? (
-            <div className="spinner">Loading profile...</div>
+
+          {user ? (
+            <ProfileEdit user={user} />
           ) : (
-            user && <ProfileEdit user={user} />
+            <div className="spinner">Loading profile...</div>
           )}
         </>
       )}
-      {/* New Pages for dev button debuging */}
-      {page === "testView" && (
+
+      {isAuthenticated && page === "testView" && (
         <ProfileView user={user} />
       )}
 
-      {page === "testInterest" && (
+      {isAuthenticated && page === "testInterest" && (
         <div>
           {testInterests.map((interest) => (
             <InterestDisplay
@@ -149,7 +264,7 @@ function App() {
         </div>
       )}
 
-      {page === "testSkills" && (
+      {isAuthenticated && page === "testSkills" && (
         <div>
           {testSkills.map((skill) => (
             <SkillDisplay
@@ -160,7 +275,6 @@ function App() {
           ))}
         </div>
       )}
-
     </>
   );
 }
