@@ -322,7 +322,7 @@ const updatePartialProfile = async (criteria, update) => {
                 context,
                 DATABASE_NAME,
                 PROFILE_TABLE,
-                { email: update.email }
+                { email: update.email, username: {$ne: existingProfile.username} }
                 );
         }   
 
