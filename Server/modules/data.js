@@ -3,7 +3,9 @@ import * as db from './db.js';
 import bcrypt from "bcrypt";
 
 const DATABASE_NAME = "LookingForLove";
-const COLLECTION_NAME = "profiles";
+const PROFILE_TABLE = "profiles";
+const MATCH_TABLE = "matches";
+const REVIEW_TABLE = "reviews";
 const SALT_ROUNDS = 10;
 
 const retrieveProfiles = async () => {
@@ -16,7 +18,7 @@ const retrieveProfiles = async () => {
         profiles = await db.findDocuments(
             context,
             DATABASE_NAME,
-            COLLECTION_NAME,
+            PROFILE_TABLE,
             {},
             { _id: 0, passwordHash: 0 }
         );
@@ -43,14 +45,53 @@ const retrieveProfilesByInterest = async (userUsername) => {
         profiles = await db.findDocuments(
             context,
             DATABASE_NAME,
-            COLLECTION_NAME,
+            PROFILE_TABLE,
             {interests: {$in: userProfile.interests}, username: {$ne: userProfile.username}},
             { _id: 0, passwordHash: 0 }
         );
 
+        let filteredProfiles = profiles.map(profile => {
+            if (!profile) return null;
 
+            const privacyLevel = profile;
 
+            switch (privacyLevel) {
+                case 0:
+                    return {
+                        username: profile.username,
+                        firstName: profile.firstName,
+                        lastName: profile.lastName,
+                        email: profile.email,
+                        interests: profile.interests,
+                        skills: profile.skills,
+                        datingPreference: profile.datingPreference,
+                        displayedGender: profile.displayerGender,
+                        location: profile.location,
+                        employment: profile.employment
+                    };
+                case 1:
+                    return {
+                        username: profile.username,
+                        firstName: profile.firstName,
+                        lastName: profile.lastName,
+                        interests: profile.interests,
+                        skills: profile.skills,
+                        datingPreference: profile.datingPreference,
+                        displayedGender: profile.displayerGender
+                    };
+                default:
+                    return {
+                        username: profile.username,
+                        firstName: profile.firstName,
+                        interests: profile.interests,
+                        skills: profile.skills,
+                        datingPreference: profile.datingPreference,
+                        displayedGender: profile.displayerGender
+                    };
+            }
+        });
 
+        profiles = filteredProfiles;
     }
     catch (e) {
         console.error(e);
@@ -72,7 +113,34 @@ const retrieveProfile = async (profileUsername) => {
         profile = await db.findDocument(
             context,
             DATABASE_NAME,
-            COLLECTION_NAME,
+            PROFILE_TABLE,
+            { username: profileUsername },
+            { _id: 0, passwordHash: 0 }
+        );
+    }
+    catch (e) {
+        console.error(e);
+    }
+    finally {
+        context?.close();
+    }
+
+    return profile;
+};
+
+
+
+const retrieveProfileByPrivacy = async (profileUsername) => {
+    let profile = null;
+    let context = undefined;
+
+    try {
+        context = await db.initDatabase(env.DB_URI);
+
+        profile = await db.findDocument(
+            context,
+            DATABASE_NAME,
+            PROFILE_TABLE,
             { username: profileUsername },
             { _id: 0, passwordHash: 0 }
         );
@@ -92,7 +160,7 @@ const retrieveProfile = async (profileUsername) => {
                         interests: profile.interests, 
                         skills: profile.skills, 
                         datingPreference: profile.datingPreference, 
-                        displayedGender: profile.displayerGender,
+                        displayedGender: profile.displayedGender,
                         location: profile.location,
                         employment: profile.employment
                     };
@@ -105,17 +173,17 @@ const retrieveProfile = async (profileUsername) => {
                         interests: profile.interests, 
                         skills: profile.skills, 
                         datingPreference: profile.datingPreference, 
-                        displayedGender: profile.displayerGender
+                        displayedGender: profile.displayedGender
                     };
                     break;
-                case 2:
+                default:
                     profile = {
                         username: profile.username, 
                         firstName: profile.firstName,
                         interests: profile.interests, 
                         skills: profile.skills, 
                         datingPreference: profile.datingPreference, 
-                        displayedGender: profile.displayerGender
+                        displayedGender: profile.displayedGender
                     }
             }
         }
@@ -140,14 +208,14 @@ const addNewProfile = async (profile) => {
         let testUsername = await db.findDocument(
             context,
             DATABASE_NAME,
-            COLLECTION_NAME,
+            PROFILE_TABLE,
             { username: profile.username }
         );
 
         let testEmail = await db.findDocument(
             context,
             DATABASE_NAME,
-            COLLECTION_NAME,
+            PROFILE_TABLE,
             { email: profile.email }
         );
 
@@ -164,7 +232,7 @@ const addNewProfile = async (profile) => {
             result = await db.insertDocument(
                 context,
                 DATABASE_NAME,
-                COLLECTION_NAME,
+                PROFILE_TABLE,
                 profileToInsert
             );
         }
@@ -193,7 +261,7 @@ const authenticateProfile = async (identifier, password) => {
         user = await db.findDocument(
             context,
             DATABASE_NAME,
-            COLLECTION_NAME,
+            PROFILE_TABLE,
             {
                 $or: [
                     { username: identifier },
@@ -236,7 +304,7 @@ const updatePartialProfile = async (criteria, update) => {
         let existingProfile = await db.findDocument(
             context,
             DATABASE_NAME,
-            COLLECTION_NAME,
+            PROFILE_TABLE,
             criteria
         );
 
@@ -245,12 +313,18 @@ const updatePartialProfile = async (criteria, update) => {
             result = "NotFound";
         }
         else {
-            let testEmail = await db.findDocument(
+
+            let testEmail = null;
+            
+            if (update.email)
+            {
+                testEmail = await db.findDocument(
                 context,
                 DATABASE_NAME,
-                COLLECTION_NAME,
+                PROFILE_TABLE,
                 { email: update.email }
-            );
+                );
+        }   
 
             if (!testEmail) {
                 if (update.username) {
@@ -261,7 +335,7 @@ const updatePartialProfile = async (criteria, update) => {
                     result = await db.updateDocument(
                         context,
                         DATABASE_NAME,
-                        COLLECTION_NAME,
+                        PROFILE_TABLE,
                         criteria,
                         update
                     );
@@ -288,6 +362,7 @@ export {
     retrieveProfiles,
     retrieveProfile,
     retrieveProfilesByInterest,
+    retrieveProfileByPrivacy,
     addNewProfile,
     authenticateProfile,
     updatePartialProfile

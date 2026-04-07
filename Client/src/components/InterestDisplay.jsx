@@ -1,14 +1,22 @@
-function InterestDisplay(props) {
-    return (
-        <div className="interest">
-            <span>{props.interest}</span>
-            <span className="remove-button" onClick={() => {
-                //LF: Remove interest from interests array in ProfileCreate if x button is clicked.
-                props.setInterests({interests: prevInterests => prevInterests.filter(interest => interest !== props.interest)});
-            }}> X</span>
-        </div>
-    );
-}//LF: WIP! Placeholder for interest display. Needs X button for removing interest and styling.
-//LF: Displaying only interest name for now.
+import "./ProfileTest.css";
+
+function InterestDisplay({ interest, setInterests }) {
+  return (
+    <div className="interest">
+      <span>{interest}</span>
+
+      <span
+        className="remove-button"
+        onClick={() => {
+          setInterests((prev) =>
+            prev.filter((i) => i !== interest)
+          );
+        }}
+      >
+        X
+      </span>
+    </div>
+  );
+}
 
 export default InterestDisplay;
