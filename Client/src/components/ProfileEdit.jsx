@@ -11,7 +11,7 @@ function ProfileEdit(props) {
     firstName: props.user.firstName || props.user.firstname || "",
     lastName: props.user.lastName || props.user.lastname || "",
   });
-  const [existingUser, setExistingUser] = useState(props.user);
+  const [existingUser] = useState(props.user);
   const [newSkill, setNewSkill] = useState("");
   const [newInterest, setNewInterest] = useState("");
   const [loading, setLoading] = useState(false);
@@ -39,7 +39,7 @@ function ProfileEdit(props) {
       }
      if(data){
       toast.success("Profile saved successfully!");
-      setExistingUser(data);
+      props.setUser(tempUser);
      } else {
        toast.error("Failed to save profile");
      }

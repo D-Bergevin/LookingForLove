@@ -166,7 +166,7 @@ function App() {
 
             {/* keep these only if needed for dev testing */}
             <button
-              onClick={() => setPage("testView")}
+              onClick={() => setPage("profileView")}
               style={navButtonStyle}
             >
               Test ProfileView
@@ -250,14 +250,14 @@ function App() {
           </div>
 
           {user ? (
-            <ProfileEdit user={user} />
+            <ProfileEdit user={user} setUser={setUser} />
           ) : (
             <div className="spinner">Loading profile...</div>
           )}
         </>
       )}
 
-      {isAuthenticated && page === "testView" && (
+      {isAuthenticated && page === "profileView" && (
         <ProfileView user={user} />
       )}
 
