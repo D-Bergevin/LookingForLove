@@ -41,9 +41,10 @@ function App() {
     skills: Array.isArray(u?.skills) ? u.skills : [],
     interests: Array.isArray(u?.interests) ? u.interests : [],
     location: {
-      Country: u?.location?.Country || "",
-      Region: u?.location?.Region || "",
-      Address: u?.location?.Address || "",
+      country: u?.location?.country || "",
+      region: u?.location?.region || "",
+      city: u?.location?.city || "",
+      address: u?.location?.address || "",
     },
     employment: {
       workplace: u?.employment?.workplace || "",
@@ -179,6 +180,13 @@ function App() {
             </button>
 
             <button
+              onClick={() => setPage("testMatches")}
+              style={navButtonStyle}
+            >
+              Test Matches
+            </button>
+
+            <button
               onClick={() => setPage("testSkills")}
               style={navButtonStyle}
             >
@@ -274,6 +282,12 @@ function App() {
               setSkills={setTestSkills}
             />
           ))}
+        </div>
+      )}
+
+      {isAuthenticated && page === "testMatches" && (
+        <div>
+          {<Matches user={user} />}
         </div>
       )}
     </>
