@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
+import Matches from "./components/Matches.jsx";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 import ProfileEdit from "./components/ProfileEdit";
@@ -74,7 +75,7 @@ function App() {
         <button onClick={() => setPage("login")}>Login</button>
         <button onClick={() => setPage("signup")}>Signup</button>
         <button onClick={() => setPage("profile")}>My Profile</button>
-
+        <button onClick={() => setPage("matches")}>Matches</button>
         <button onClick={() => setPage("testView")}>Test ProfileView</button>
         <button onClick={() => setPage("testInterest")}>Test Interests</button>
         <button onClick={() => setPage("testSkills")}>Test Skills</button>
@@ -93,6 +94,10 @@ function App() {
 
       {page === "signup" && (
         <Signup goToLogin={() => setPage("login")} />
+      )}
+
+      {page === "matches" && (
+        <Matches user={user}/>
       )}
 
       {page === "profile" && (

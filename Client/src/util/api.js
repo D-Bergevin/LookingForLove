@@ -125,5 +125,20 @@ const profile = {
     }
 
 };
+const matches = {
+    async getMatches(username) {
+        const token = localStorage.getItem('authToken');
+        const res = await fetch(serverRoute(`/profilesbyinterest/${username}`), {
+            method: 'GET',
+            headers: {
+                ...headers,
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to fetch matches');
+        return data;
+    }
+}
 
-export { profile };
+export { profile, matches };

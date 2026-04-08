@@ -1,5 +1,3 @@
-import { useState, useEffect } from "react";
-import * as api from "../util/api.js";
 function ProfileView({ user }) {
     if (!user) {
         return <div>Loading...</div>
