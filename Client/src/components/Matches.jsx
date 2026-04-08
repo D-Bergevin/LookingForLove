@@ -2,16 +2,25 @@ import "./ProfileTest.css";
 import InterestDisplay from "./InterestDisplay.jsx";
 import SkillDisplay from "./SkillDisplay.jsx";
 import * as api from "../util/api.js";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProfileView from "./ProfileView.jsx";
 function ProfileCreate({user}){
     const [matches, setMatches] = useState([]);
-    console.log("Fetching matches for user:", user.username);
-    api.matches.getMatches(user.username).then((res) => {
+    useEffect(() => {
+        api.matches.getMatches(user.username).then((res) => {
         setMatches(res);
     }).catch((err) => {
         console.error("Error fetching matches:", err);
     });
+    
+  }, [user.username]);
+    
+    if (!matches) {
+        return <div>Loading...</div>
+    }
+    if (matches.length === 0) {
+        return <div>No matches found.</div>
+    }
     return(
     <div className="container">
         <h1>Looking For Love Profile Match</h1>
