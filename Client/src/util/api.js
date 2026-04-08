@@ -128,7 +128,7 @@ const profile = {
 const matches = {
     async getMatches(username) {
         const token = localStorage.getItem('authToken');
-        const res = await fetch(serverRoute(`/profilesbyinterest/${username}`), {
+        const res = await fetch(serverRoute(`profilesbyinterest/${username}`), {
             method: 'GET',
             headers: {
                 ...headers,

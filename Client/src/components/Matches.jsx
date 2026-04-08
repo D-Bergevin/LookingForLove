@@ -4,9 +4,9 @@ import SkillDisplay from "./SkillDisplay.jsx";
 import * as api from "../util/api.js";
 import { useState } from "react";
 import ProfileView from "./ProfileView.jsx";
-function ProfileCreate(user){
+function ProfileCreate({user}){
     const [matches, setMatches] = useState([]);
-    console.log("Fetching matches for user:", user);
+    console.log("Fetching matches for user:", user.username);
     api.matches.getMatches(user.username).then((res) => {
         setMatches(res);
     }).catch((err) => {
