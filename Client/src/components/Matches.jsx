@@ -12,9 +12,8 @@ function ProfileCreate({user}){
     }).catch((err) => {
         console.error("Error fetching matches:", err);
     });
-    
   }, [user.username]);
-    
+
     if (!matches) {
         return <div>Loading...</div>
     }

@@ -39,6 +39,7 @@ function ProfileEdit(props) {
       }
      if(data){
       toast.success("Profile saved successfully!");
+      setExistingUser(data);
      } else {
        toast.error("Failed to save profile");
      }
@@ -193,11 +194,11 @@ function ProfileEdit(props) {
         <label>Country</label>
         <input
           type="text"
-          defaultValue={props.user.location.Country}
+          defaultValue={props.user.location.country}
           onChange={(e) =>
             setTempUser({
               ...tempUser,
-              location: { ...tempUser.location, Country: e.target.value },
+              location: { ...tempUser.location, country: e.target.value },
             })
           }
         />
@@ -205,11 +206,23 @@ function ProfileEdit(props) {
         <label>Region</label>
         <input
           type="text"
-          defaultValue={props.user.location.Region}
+          defaultValue={props.user.location.region}
           onChange={(e) =>
             setTempUser({
               ...tempUser,
-              location: { ...tempUser.location, Region: e.target.value },
+              location: { ...tempUser.location, region: e.target.value },
+            })
+          }
+        />
+
+        <label>City</label>
+        <input
+          type="text"
+          defaultValue={props.user.location.city}
+          onChange={(e) =>
+            setTempUser({
+              ...tempUser,
+              location: { ...tempUser.location, city: e.target.value },
             })
           }
         />
@@ -217,11 +230,11 @@ function ProfileEdit(props) {
         <label>Address</label>
         <input
           type="text"
-          defaultValue={props.user.location.Address}
+          defaultValue={props.user.location.address}
           onChange={(e) =>
             setTempUser({
               ...tempUser,
-              location: { ...tempUser.location, Address: e.target.value },
+              location: { ...tempUser.location, address: e.target.value },
             })
           }
         />
