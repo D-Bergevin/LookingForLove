@@ -53,7 +53,17 @@ const retrieveProfilesByInterest = async (userUsername) => {
         let filteredProfiles = profiles.map(profile => {
             if (!profile) return null;
 
-            const privacyLevel = profile;
+            if (userProfile.datingPreference !== "A" && userProfile.datingPreference !== profile.displayedGender)
+            {
+                return null;
+            }
+
+            if (profile.datingPreference !== "A" && profile.datingPreference !== userProfile.displayedGender)
+            {
+                return null
+            }
+
+            const privacyLevel = profile.privacyLevel;
 
             switch (privacyLevel) {
                 case 0:
@@ -65,7 +75,7 @@ const retrieveProfilesByInterest = async (userUsername) => {
                         interests: profile.interests,
                         skills: profile.skills,
                         datingPreference: profile.datingPreference,
-                        displayedGender: profile.displayerGender,
+                        displayedGender: profile.displayedGender,
                         location: profile.location,
                         employment: profile.employment
                     };
@@ -77,7 +87,7 @@ const retrieveProfilesByInterest = async (userUsername) => {
                         interests: profile.interests,
                         skills: profile.skills,
                         datingPreference: profile.datingPreference,
-                        displayedGender: profile.displayerGender
+                        displayedGender: profile.displayedGender
                     };
                 default:
                     return {
@@ -86,10 +96,10 @@ const retrieveProfilesByInterest = async (userUsername) => {
                         interests: profile.interests,
                         skills: profile.skills,
                         datingPreference: profile.datingPreference,
-                        displayedGender: profile.displayerGender
+                        displayedGender: profile.displayedGender
                     };
             }
-        });
+        }).filter(profile => profile !== null);
 
         profiles = filteredProfiles;
     }
