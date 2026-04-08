@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
+import Matches from "./components/Matches.jsx";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 import ProfileEdit from "./components/ProfileEdit";
