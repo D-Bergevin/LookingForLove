@@ -27,6 +27,7 @@ function Login({ setUser, goToSignup }) {
 
       if (data) {
         toast.success("Login successful");
+        localStorage.setItem("username", data.username);
         setUser(data);
       }
 
