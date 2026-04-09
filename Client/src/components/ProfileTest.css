@@ -82,3 +82,11 @@ button:hover {
     margin: 40px auto;
     padding: 25px;
 }
+
+.star.active {
+    color: gold;
+}
+
+.star:hover {
+    color: blueviolet;
+}
