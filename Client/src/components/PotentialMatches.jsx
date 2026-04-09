@@ -92,6 +92,9 @@ function PotentialMatches({ user }) {
             <th>Location</th>
             <th>Interests</th>
             <th>Skills</th>
+
+            {/* Column for sending match requests */}
+            <th>Match?</th>
           </tr>
         </thead>
         <tbody>
@@ -111,6 +114,11 @@ function PotentialMatches({ user }) {
               </td>
               <td>{Array.isArray(profile.interests) ? profile.interests.join(", ") : "N/A"}</td>
               <td>{Array.isArray(profile.skills) ? profile.skills.join(", ") : "N/A"}</td>
+              {/* Match Button */}
+              {/* TO DO: Add function SendMatchRequest to user onClick */}
+              <td>
+                <button>Request Match</button>
+              </td>
             </tr>
           ))}
         </tbody>

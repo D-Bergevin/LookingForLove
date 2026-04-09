@@ -3,7 +3,7 @@ import * as api from "../util/api.js";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 
-function ProfileCreate({ user }) {
+function MatchesList({ user }) {
   const [matches, setMatches] = useState(null);
 
   useEffect(() => {
@@ -104,6 +104,9 @@ function ProfileCreate({ user }) {
             <th>Bio</th>
             <th>Interests</th>
             <th>Skills</th>
+
+            {/* Added button for review */}
+            <th>Review?</th>
           </tr>
         </thead>
         <tbody>
@@ -121,6 +124,12 @@ function ProfileCreate({ user }) {
               <td>{profile.bio || "N/A"}</td>
               <td>{Array.isArray(profile.interests) ? profile.interests.join(", ") : "N/A"}</td>
               <td>{Array.isArray(profile.skills) ? profile.skills.join(", ") : "N/A"}</td>
+              {/* Button for contact and review */}
+              {/* TO DO: Add handleViewContactInfo and handleReview functions onClick */}
+              <td>
+                <button>View Contact Information</button>
+                <button>Leave Review</button>
+              </td>
             </tr>
           ))}
         </tbody>
@@ -129,4 +138,4 @@ function ProfileCreate({ user }) {
   );
 }
 
-export default ProfileCreate;
+export default MatchesList;
