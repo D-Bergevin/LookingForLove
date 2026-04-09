@@ -1,29 +1,29 @@
-.container{
+.container {
     max-width: 500px;
     margin: 40px auto;
     padding: 25px;
 }
 
-h1{
+h1 {
     text-align: center;
 }
 
-h2{
+h2 {
     margin-bottom: 20px;
     text-align: center;
 }
 
-.form{
+.form {
     display: flex;
     flex-direction: column;
 }
 
-label{
+label {
     margin-top: 10px;
     font-weight: bold;
 }
 
-input{
+input {
     width: 100%;
     padding: 8px;
     margin-top: 5px;
@@ -31,11 +31,11 @@ input{
     border: 1px solid #ccc;
 }
 
-select{
+select {
     height: 35px;
 }
 
-button{
+button {
     margin-top: 20px;
     padding: 10px;
     background-color: darksalmon;
@@ -44,37 +44,41 @@ button{
     cursor: pointer;
 }
 
-button:hover{
+button:hover {
     background-color: deeppink;
 }
+
 .match-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: white;
 }
 
 .match-table th,
 .match-table td {
-  border: 1px solid #ddd;
-  padding: 10px;
-  text-align: left;
-  vertical-align: top;
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+    vertical-align: top;
+    color: #1f2937;
 }
 
 .match-table th {
-  background-color: #f4f4f4;
-  font-weight: 600;
+    background-color: #f4f4f4;
+    color: #111827;
+    font-weight: 600;
 }
 
 .match-table tr:nth-child(even) {
-  background-color: #fafafa;
+    background-color: #fafafa;
 }
 
 .match-table tr:hover {
-  background-color: #f1f1f1;
+    background-color: #f1f1f1;
 }
 
 .matches_container {
-      margin: 40px auto;
+    margin: 40px auto;
     padding: 25px;
 }
