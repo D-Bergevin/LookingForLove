@@ -47,3 +47,34 @@ button{
 button:hover{
     background-color: deeppink;
 }
+.match-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.match-table th,
+.match-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.match-table th {
+  background-color: #f4f4f4;
+  font-weight: 600;
+}
+
+.match-table tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.match-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.matches_container {
+      margin: 40px auto;
+    padding: 25px;
+}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import Matches from "./components/Matches.jsx";
+import PotentialMatches from "./components/PotentialMatches.jsx";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 import ProfileEdit from "./components/ProfileEdit";
@@ -16,7 +17,6 @@ function App() {
   const [user, setUser] = useState(null);
   const [loadingUser, setLoadingUser] = useState(true);
 
-  // test data for dev buttons
   const [testInterests, setTestInterests] = useState([
     "Gaming",
     "Music",
@@ -72,9 +72,7 @@ function App() {
         setPage("profile");
       }
     } catch (e) {
-      console.error("Failed to load user profile:", e);
       toast.error(e.message || "Failed to load user profile");
-
       localStorage.removeItem("authToken");
       localStorage.removeItem("username");
       setUser(null);
@@ -127,13 +125,13 @@ function App() {
     <>
       <Toaster position="top-right" />
 
-      {/* NAVIGATION */}
       <div
         style={{
           padding: "10px 16px",
           background: "#eee",
           display: "flex",
           alignItems: "center",
+          justifyContent:"end",
           gap: "10px",
           width: "100%",
           boxSizing: "border-box",
@@ -141,30 +139,20 @@ function App() {
       >
         {!isAuthenticated ? (
           <>
-            <button
-              onClick={() => setPage("login")}
-              style={navButtonStyle}
-            >
+            <button onClick={() => setPage("login")} style={navButtonStyle}>
               Login
             </button>
 
-            <button
-              onClick={() => setPage("signup")}
-              style={navButtonStyle}
-            >
+            <button onClick={() => setPage("signup")} style={navButtonStyle}>
               Signup
             </button>
           </>
         ) : (
           <>
-            <button
-              onClick={() => setPage("profile")}
-              style={navButtonStyle}
-            >
+            <button onClick={() => setPage("profile")} style={navButtonStyle}>
               My Profile
             </button>
 
-            {/* keep these only if needed for dev testing */}
             <button
               onClick={() => setPage("profileView")}
               style={navButtonStyle}
@@ -187,6 +175,13 @@ function App() {
             </button>
 
             <button
+              onClick={() => setPage("testPotentialMatch")}
+              style={navButtonStyle}
+            >
+              Test Potential Match
+            </button>
+
+            <button
               onClick={() => setPage("testSkills")}
               style={navButtonStyle}
             >
@@ -203,7 +198,6 @@ function App() {
         )}
       </div>
 
-      {/* PUBLIC PAGES */}
       {!isAuthenticated && page === "login" && (
         <Login
           setUser={async (u) => {
@@ -222,7 +216,6 @@ function App() {
         <Signup goToLogin={() => setPage("login")} />
       )}
 
-      {/* PROTECTED PAGES */}
       {isAuthenticated && page === "profile" && (
         <>
           <div
@@ -257,9 +250,7 @@ function App() {
         </>
       )}
 
-      {isAuthenticated && page === "profileView" && (
-        <ProfileView user={user} />
-      )}
+      {isAuthenticated && page === "profileView" && <ProfileView user={user} />}
 
       {isAuthenticated && page === "testInterest" && (
         <div>
@@ -287,7 +278,13 @@ function App() {
 
       {isAuthenticated && page === "testMatches" && (
         <div>
-          {<Matches user={user} />}
+          <Matches user={user} />
+        </div>
+      )}
+
+      {isAuthenticated && page === "testPotentialMatch" && (
+        <div>
+          <PotentialMatches user={user} />
         </div>
       )}
     </>
