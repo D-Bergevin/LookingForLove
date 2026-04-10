@@ -36,11 +36,15 @@ function Matches({ user }) {
 
   //saving reviews in local storage for now
   useEffect(() => {
-    const savedReviews = localStorage.getItem("matchReviews");
-    if (savedReviews) {
-      setReviews(JSON.parse(savedReviews));
-    }
-  }, []);
+    const loadReviews = async () => {
+      const savedReviews = await api.matches.getReviews(user.username);
+      if (savedReviews) {
+        setReviews(savedReviews);
+      }
+    };
+
+    loadReviews();
+  }, [user?.username, selectedMatch?.username]);
 
   useEffect(() => {
     localStorage.setItem("matchReviews", JSON.stringify(reviews));
@@ -65,7 +69,7 @@ function Matches({ user }) {
     setComment("");
   }
 
-  const submitReview = () => {
+  const submitReview = async () => {
     if (!selectedMatch) return;
 
     if (rating < 1 || rating > 5) {
@@ -76,14 +80,16 @@ function Matches({ user }) {
     try {
       setSubmittingReview(true);
 
-      //save review locally
-      setReviews((prev) => ({
-        ...prev,
-        [selectedMatch.username]: {
-          rating,
-          comment,
-        },
-      }));
+      // //save review locally TODO: Remove this and fetch reviews from server instead
+      // setReviews((prev) => ({
+      //   ...prev,
+      //   [selectedMatch.username]: {
+      //     rating,
+      //     comment,
+      //   },
+      // }));
+      //save review to server
+      setReviews(await api.matches.postReview(user.username, selectedMatch.username, { rating, comment }));
 
       toast.success("Review saved");
       setSelectedMatch(null);

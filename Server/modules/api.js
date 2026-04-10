@@ -12,7 +12,8 @@ import {
     retrieveProfilesByInterest,
     matchProfiles,
     retreiveMatchedProfiles,
-    reviewMatch
+    reviewMatch,
+    retrieveReviewsByUsername
 } from './data.js';
 
 // The Express application object
@@ -217,10 +218,10 @@ app.put('/match/:senderUsername/:receiverUsername', async (request, response) =>
     }
 });
 
-app.put('/match/:reviewerUsername/:matchedUsername/:reviewRating', async (request, response) => {
+app.put('/review/:reviewerUsername/:matchedUsername/:review', async (request, response) => {
 
     try {
-        const result = await reviewMatch(request.params.reviewerUsername, request.params.matchedUsername, request.params.reviewRating);
+        const result = await reviewMatch(request.params.reviewerUsername, request.params.matchedUsername, request.params.review);
 
         if (result === "NotFound") {
             response.sendStatus(404);
@@ -233,6 +234,24 @@ app.put('/match/:reviewerUsername/:matchedUsername/:reviewRating', async (reques
         }
         else {
             response.json(result);
+        }
+    }
+    catch (e) {
+        console.error(e);
+        response.sendStatus(500);
+    }
+});
+
+app.get('/review/:senderUsername', authenticateToken, async (request, response) => {
+    try {
+        const senderUsername = request.params.senderUsername;
+
+        let reviews = await retrieveReviewsByUsername(senderUsername);
+
+        if (reviews) {
+            response.json(reviews);
+        } else {
+            response.status(404).json({ error: "Reviews not found" });
         }
     }
     catch (e) {

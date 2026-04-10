@@ -538,7 +538,31 @@ const matchProfiles = async (senderUsername, receiverUsername) => {
     return result;
 };
 
-const reviewMatch = async (reviewerUsername, matchedUsername, reviewRating) => {
+const retrieveReviewsByUsername = async (username) => {
+    let reviews = [];
+    let context = undefined;
+    try{
+        context = await db.initDatabase(env.DB_URI);
+
+        reviews = await db.findDocuments(
+            context,
+            DATABASE_NAME,
+            REVIEW_TABLE,
+            { reviewer: username },
+            //{ _id: 0 }
+        );
+    }
+    catch (e) {
+        console.error(e);
+    }
+    finally {
+        context?.close();
+    }
+
+    return reviews;
+}
+
+const reviewMatch = async (reviewerUsername, matchedUsername, review) => {
     let context = undefined;
     let result = undefined;
 
@@ -576,7 +600,7 @@ const reviewMatch = async (reviewerUsername, matchedUsername, reviewRating) => {
 
             if (matchExists)
             {
-                if (reviewRating > 5 || reviewRating < 1)
+                if (review.rating > 5 || review.rating < 1)
                 {
                     //Rating not 1-5
                     console.error("ERROR: Rating is not in between 1-5.");
@@ -591,7 +615,8 @@ const reviewMatch = async (reviewerUsername, matchedUsername, reviewRating) => {
                         {
                             reviewer: reviewerProfile.username,
                             matched: matchedProfile.username,
-                            rating: reviewRating
+                            rating: review.rating,
+                            comment: review.comment
                         }
                     );
                 }
@@ -625,5 +650,6 @@ export {
     updatePartialProfile,
     matchProfiles,
     retreiveMatchedProfiles,
-    reviewMatch
+    reviewMatch,
+    retrieveReviewsByUsername
 };
