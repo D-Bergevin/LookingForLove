@@ -11,7 +11,8 @@ import {
     updatePartialProfile,
     retrieveProfilesByInterest,
     matchProfiles,
-    retreiveMatchedProfiles
+    retreiveMatchedProfiles,
+    reviewMatch
 } from './data.js';
 
 // The Express application object
@@ -216,6 +217,29 @@ app.put('/match/:senderUsername/:receiverUsername', async (request, response) =>
     }
 });
 
+app.put('/match/:reviewerUsername/:matchedUsername/:reviewRating', async (request, response) => {
+
+    try {
+        const result = await reviewMatch(request.params.reviewerUsername, request.params.matchedUsername, request.params.reviewRating);
+
+        if (result === "NotFound") {
+            response.sendStatus(404);
+        }
+        else if (result === "NotMatched") {
+            response.sendStatus(409);
+        }
+        else if (result === "Rating") {
+            response.sendStatus(400);
+        }
+        else {
+            response.json(result);
+        }
+    }
+    catch (e) {
+        console.error(e);
+        response.sendStatus(500);
+    }
+});
 
 
 const startServer = (port) => {

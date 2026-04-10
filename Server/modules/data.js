@@ -538,6 +538,82 @@ const matchProfiles = async (senderUsername, receiverUsername) => {
     return result;
 };
 
+const reviewMatch = async (reviewerUsername, matchedUsername, reviewRating) => {
+    let context = undefined;
+    let result = undefined;
+
+    try {
+        context = await db.initDatabase(env.DB_URI);
+
+        let reviewerProfile = await db.findDocument(
+            context,
+            DATABASE_NAME,
+            PROFILE_TABLE,
+            { username: reviewerUsername }
+        );
+
+        let matchedProfile = await db.findDocument(
+            context,
+            DATABASE_NAME,
+            PROFILE_TABLE,
+            { username: matchedUsername }
+        );
+
+        if (!reviewerProfile || !matchedProfile) {
+            console.error("ERROR: Profile does not exist.");
+            result = "NotFound";
+        }
+        else {
+
+            let matchExists = await db.findDocument(
+                context,
+                DATABASE_NAME,
+                MATCH_TABLE,
+                { $or: [{initialSender: reviewerProfile.username, initialReceiver: matchedProfile.username, matched: "true"},
+                    {initialSender: matchedProfile.username, initialReceiver: reviewerProfile.username, matched: "true"}] 
+                }
+            );
+
+            if (matchExists)
+            {
+                if (reviewRating > 5 || reviewRating < 1)
+                {
+                    //Rating not 1-5
+                    console.error("ERROR: Rating is not in between 1-5.");
+                    result = "Rating";
+                }
+                else
+                {
+                    result = await db.insertDocument(
+                        context,
+                        DATABASE_NAME,
+                        REVIEW_TABLE,
+                        {
+                            reviewer: reviewerProfile.username,
+                            matched: matchedProfile.username,
+                            rating: reviewRating
+                        }
+                    );
+                }
+            }
+            else
+            {
+                //Profiles not matched
+                console.error("ERROR: Profiles are not matched.");
+                result = "NotMatched";
+            }
+        }
+    }
+    catch (e) {
+        console.error(e);
+    }
+    finally {
+        context?.close();
+    }
+
+    return result;
+};
+
 export {
     DATABASE_NAME,
     retrieveProfiles,
@@ -548,5 +624,6 @@ export {
     authenticateProfile,
     updatePartialProfile,
     matchProfiles,
-    retreiveMatchedProfiles
+    retreiveMatchedProfiles,
+    reviewMatch
 };
