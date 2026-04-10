@@ -46,7 +46,7 @@ function PotentialMatches({ user }) {
   };
 
   if (potentialMatches === null) {
-    return <div></div>;
+    return <div>Loading Potential Matches...</div>;
   }
 
   if (potentialMatches.length === 0) {
