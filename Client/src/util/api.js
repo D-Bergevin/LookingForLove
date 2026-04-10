@@ -152,6 +152,29 @@ const matches = {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to fetch matches');
         return data;
+    },
+    async requestMatch(senderUsername, receiverUsername) {
+        const token = localStorage.getItem("authToken");
+
+        const res = await fetch(serverRoute(`match/${senderUsername}/${receiverUsername}`), {
+            method: 'PUT',
+            headers: {
+                ...headers,
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        let data = null
+        try {
+            data = await res.json();
+        }
+        catch {
+            data = null;
+        }
+        if (!res.ok) {
+            throw new Error(data?.error || 'Fauled to send match request')
+        }
+        return data;
     }
 }
 

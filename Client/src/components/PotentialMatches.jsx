@@ -42,7 +42,24 @@ function PotentialMatches({ user }) {
 
   //TO DO put in match request logic
   const requestMatch = async (profile) => {
-    toast("Match request feature is not connected yet.");
+    try {
+      if (!profile?.username) {
+        toast.error("Profile missing username somehow??")
+        return;
+      }
+
+      await matches.requestMatch(user.username, profile.username);
+
+      toast.success(`Match request sent to ${profile.username}`)
+
+      setPotentialMatches((prev) =>
+        prev.filter((p) => p.username !== profile.username)
+      );
+    }
+    catch (err) {
+      console.error("Failed to send match request: ", err)
+      toast.error(err.message || "failed to send match request");
+    }
   };
 
   if (potentialMatches === null) {
@@ -100,9 +117,7 @@ function PotentialMatches({ user }) {
                   {Array.isArray(profile.skills) ? profile.skills.join(", ") : "N/A"}
                 </td>
                 <td>
-                  <button onClick={() => requestMatch(profile)}>
-                    Request Match
-                  </button>
+                  <button onClick={() => requestMatch(profile)}>Request Match</button>
                 </td>
               </tr>
             );
