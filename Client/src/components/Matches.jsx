@@ -117,7 +117,6 @@ function Matches({ user }) {
           <tr>
             <th>Name</th>
             <th>Username</th>
-            <th>Age</th>
             <th>Gender</th>
             <th>Location</th>
             <th>Bio</th>
@@ -131,7 +130,6 @@ function Matches({ user }) {
             <tr key={profile.id || profile.username || i}>
               <td>{`${profile.firstName || ""} ${profile.lastName || ""}`.trim() || "N/A"}</td>
               <td>{profile.username || "N/A"}</td>
-              <td>{profile.age || "N/A"}</td>
               <td>{profile.displayedGender || "N/A"}</td>
               <td>
                 {[profile.location?.city, profile.location?.region, profile.location?.country]
