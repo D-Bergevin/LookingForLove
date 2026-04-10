@@ -6,73 +6,47 @@ import "./ProfileTest.css";
 function PotentialMatches({ user }) {
   const [potentialMatches, setPotentialMatches] = useState(null);
 
+  const getSharedInterests = (currentUser, profile) => {
+    const userInterests = Array.isArray(currentUser?.interests) ? currentUser.interests : [];
+    const profileInterests = Array.isArray(profile?.interests) ? profile.interests : [];
+
+    return profileInterests.filter((interest) =>
+      userInterests.includes(interest)
+    );
+  };
+
   useEffect(() => {
     const fetchPotentialMatches = async () => {
+      if (!user?.username) {
+        setPotentialMatches([]);
+        return;
+      }
+
       try {
-        const res = await matches.getPotentialUserList();
-        debugger;
+        const res = await matches.getMatches(user.username);
 
-        if (Array.isArray(res) && res.length > 0) {
+        if (Array.isArray(res)) {
           setPotentialMatches(res);
-          return;
+        } else {
+          setPotentialMatches([]);
         }
-
-        // fallback dummy data if API returns null / empty
-        setPotentialMatches([
-          {
-            id: 1,
-            username: "amna01",
-            firstName: "Amna",
-            lastName: "Ali",
-            displayedGender: "Female",
-            location: { city: "Lahore", region: "Punjab", country: "Pakistan" },
-            interests: ["Travel", "Books", "Music"],
-            skills: ["Writing", "Communication"],
-          },
-          {
-            id: 2,
-            username: "hamza_dev",
-            firstName: "Hamza",
-            lastName: "Khan",
-            displayedGender: "Male",
-            location: { city: "Karachi", region: "Sindh", country: "Pakistan" },
-            interests: ["Coding", "Gaming", "Movies"],
-            skills: ["React", "Node.js"],
-          },
-        ]);
       } catch (err) {
-        toast.error("Failed to fetch potential matches. Showing dummy data.");
-
-        setPotentialMatches([
-          {
-            id: 1,
-            username: "amna01",
-            firstName: "Amna",
-            lastName: "Ali",
-            displayedGender: "Female",
-            location: { city: "Lahore", region: "Punjab", country: "Pakistan" },
-            interests: ["Travel", "Books", "Music"],
-            skills: ["Writing", "Communication"],
-          },
-          {
-            id: 2,
-            username: "hamza_dev",
-            firstName: "Hamza",
-            lastName: "Khan",
-            displayedGender: "Male",
-            location: { city: "Karachi", region: "Sindh", country: "Pakistan" },
-            interests: ["Coding", "Gaming", "Movies"],
-            skills: ["React", "Node.js"],
-          },
-        ]);
+        console.error("Failed to fetch potential matches:", err);
+        toast.error(err.message || "Failed to fetch potential matches");
+        setPotentialMatches([]);
       }
     };
 
     fetchPotentialMatches();
   }, [user]);
 
+  //TO DO put in match request logic
+  const requestMatch = async (profile) => {
+    toast("Match request feature is not connected yet.");
+  };
+
   if (potentialMatches === null) {
-    return <div>Loading potential matches...</div>;
+    return <div></div>;
   }
 
   if (potentialMatches.length === 0) {
@@ -80,7 +54,7 @@ function PotentialMatches({ user }) {
   }
 
   return (
-    <div className="matches_container ">
+    <div className="matches_container">
       <h1>Potential Match List</h1>
 
       <table className="match-table">
@@ -90,37 +64,49 @@ function PotentialMatches({ user }) {
             <th>Username</th>
             <th>Gender</th>
             <th>Location</th>
-            <th>Interests</th>
+            <th>Shared Interests</th>
+            <th>All Interests</th>
             <th>Skills</th>
-
-            {/* Column for sending match requests */}
             <th>Match?</th>
           </tr>
         </thead>
         <tbody>
-          {potentialMatches.map((profile, i) => (
-            <tr key={profile.id || profile.username || i}>
-              <td>{`${profile.firstName || ""} ${profile.lastName || ""}`.trim() || "N/A"}</td>
-              <td>{profile.username || "N/A"}</td>
-              <td>{profile.displayedGender || "N/A"}</td>
-              <td>
-                {[
-                  profile.location?.city,
-                  profile.location?.region,
-                  profile.location?.country,
-                ]
-                  .filter(Boolean)
-                  .join(", ") || "N/A"}
-              </td>
-              <td>{Array.isArray(profile.interests) ? profile.interests.join(", ") : "N/A"}</td>
-              <td>{Array.isArray(profile.skills) ? profile.skills.join(", ") : "N/A"}</td>
-              {/* Match Button */}
-              {/* TO DO: Add function SendMatchRequest to user onClick */}
-              <td>
-                <button>Request Match</button>
-              </td>
-            </tr>
-          ))}
+          {potentialMatches.map((profile, i) => {
+            const sharedInterests = getSharedInterests(user, profile);
+            return (
+              <tr key={profile.username || i}>
+                <td>
+                  {`${profile.firstName || ""} ${profile.lastName || ""}`.trim() ||
+                    "N/A"}
+                </td>
+                <td>{profile.username || "N/A"}</td>
+                <td>{profile.displayedGender || "N/A"}</td>
+                <td>
+                  {[
+                    profile.location?.city,
+                    profile.location?.region,
+                    profile.location?.country,
+                  ]
+                    .filter(Boolean)
+                    .join(", ") || "N/A"}
+                </td>
+                <td>
+                  {sharedInterests.length > 0 ? sharedInterests.join(", ") : "None"}
+                </td>
+                <td>
+                  {Array.isArray(profile.interests) ? profile.interests.join(", ") : "N/A"}
+                </td>
+                <td>
+                  {Array.isArray(profile.skills) ? profile.skills.join(", ") : "N/A"}
+                </td>
+                <td>
+                  <button onClick={() => requestMatch(profile)}>
+                    Request Match
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
