@@ -491,7 +491,7 @@ const matchProfiles = async (senderUsername, receiverUsername) => {
                         DATABASE_NAME,
                         MATCH_TABLE,
                         {initialSender: receiver.username, initialReceiver: sender.username},
-                        {$set: {matched: "true"}}
+                        {matched: "true"}
                     );
                     }
                     else
