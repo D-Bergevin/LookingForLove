@@ -4,6 +4,7 @@ import Matches from "./components/Matches.jsx";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 import ProfileEdit from "./components/ProfileEdit";
+import PotentialMatches from "./components/PotentialMatches.jsx";
 import { profile } from "./util/api.js";
 
 // dev components
