@@ -23,9 +23,9 @@ function Matches({ user }) {
 
       try {
         const res = await api.matches.getMatches(user.username);
-
         setMatches(Array.isArray(res) ? res : [])
-      } catch (err) {
+      } 
+      catch{
         toast.error("Failed to load matches.");
         setMatches([]);
       }
@@ -91,7 +91,7 @@ function Matches({ user }) {
       setComment("");
     }
 
-    catch (err) {
+    catch{
       toast.error("Failed to save review :(");
     }
 
