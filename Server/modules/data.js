@@ -502,8 +502,8 @@ const matchProfiles = async (senderUsername, receiverUsername) => {
                             DATABASE_NAME,
                             MATCH_TABLE,
                             {
-                                initialSender: profile.username,
-                                initialReceiver: matchingProfile.username,
+                                initialSender: sender.username,
+                                initialReceiver: receiver.username,
                                 matched: "false"
                             }
                         );
