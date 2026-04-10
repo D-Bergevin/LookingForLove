@@ -10,6 +10,7 @@ import { profile } from "./util/api.js";
 import ProfileView from "./components/ProfileView.jsx";
 import InterestDisplay from "./components/InterestDisplay.jsx";
 import SkillDisplay from "./components/SkillDisplay.jsx";
+import PotentialMatches from "./components/PotentialMatches.jsx";
 
 function App() {
   const [page, setPage] = useState("login");
@@ -180,6 +181,13 @@ function App() {
             </button>
 
             <button
+              onClick={() => setPage("testPotentialMatches")}
+              style={navButtonStyle}
+            >
+              Test Potential Matches
+            </button>
+
+            <button
               onClick={() => setPage("testMatches")}
               style={navButtonStyle}
             >
@@ -288,6 +296,11 @@ function App() {
       {isAuthenticated && page === "testMatches" && (
         <div>
           {<Matches user={user} />}
+        </div>
+      )}
+      {isAuthenticated && page === "testPotentialMatches" && (
+        <div>
+          {<PotentialMatches user={user} />}
         </div>
       )}
     </>
