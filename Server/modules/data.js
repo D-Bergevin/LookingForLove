@@ -39,6 +39,11 @@ const retrieveProfilesByInterest = async (userUsername) => {
 
     let userProfile = await retrieveProfile(userUsername);
 
+    if (!userProfile)
+    {
+        return profiles;
+    }
+
     try {
         context = await db.initDatabase(env.DB_URI);
 
@@ -102,6 +107,65 @@ const retrieveProfilesByInterest = async (userUsername) => {
         }).filter(profile => profile !== null);
 
         profiles = filteredProfiles;
+    }
+    catch (e) {
+        console.error(e);
+    }
+    finally {
+        context?.close();
+    }
+
+    return profiles;
+};
+
+const retreiveMatchedProfiles = async (userUsername) => {
+    let profiles = [];
+    let context = undefined;
+
+    let userProfile = await retrieveProfile(userUsername);
+
+    if (!userProfile)
+    {
+        return profiles;
+    }
+
+    try {
+        context = await db.initDatabase(env.DB_URI);
+
+        let matches = await db.findDocuments(
+            context,
+            DATABASE_NAME,
+            MATCH_TABLE,
+            { $or: [{initialSender: userUsername, matched: "true"},
+                    {initialReceiver: userUsername, matched: "true"}] 
+            },
+            { _id: 0, matched: 0 }
+        );
+
+        let matchUsernames = matches.map(match => {
+            if (!match) return null;
+
+            if (match.initialSender === userUsername)
+            {
+                return match.initialReceiver
+            }
+            else if (match.initialReceiver === userUsername)
+            {
+                return match.initialSender;
+            }
+            else return null;
+
+        }).filter(matchUsername => matchUsername !== null);
+
+        profiles = await db.findDocuments(
+            context,
+            DATABASE_NAME,
+            PROFILE_TABLE,
+            {username: {$in: matchUsernames}},
+            { _id: 0, passwordHash: 0 }
+        );
+
+        
     }
     catch (e) {
         console.error(e);
@@ -367,6 +431,189 @@ const updatePartialProfile = async (criteria, update) => {
     return result;
 };
 
+//WIP
+const matchProfiles = async (senderUsername, receiverUsername) => {
+    let context = undefined;
+    let result = undefined;
+
+    try {
+        context = await db.initDatabase(env.DB_URI);
+
+        let sender = await db.findDocument(
+            context,
+            DATABASE_NAME,
+            PROFILE_TABLE,
+            { username: senderUsername }
+        );
+
+        let receiver = await db.findDocument(
+            context,
+            DATABASE_NAME,
+            PROFILE_TABLE,
+            { username: receiverUsername }
+        );
+
+        if (sender && receiver) {
+
+            let alreadyMatched = await db.findDocument(
+            context,
+            DATABASE_NAME,
+            MATCH_TABLE,
+            { $or: [{initialSender: sender.username, initialReceiver: receiver.username, matched: "true"},
+                    {initialSender: receiver.username, initialReceiver: sender.username, matched: "true"}] 
+            }
+            );
+
+            if (!alreadyMatched)
+            {
+
+                let requestAlreadySent = await db.findDocument(
+                context,
+                DATABASE_NAME,
+                MATCH_TABLE,
+                { initialSender: sender.username, initialReceiver: receiver.username }
+                );
+
+                if (!requestAlreadySent)
+                {
+                    let receiverSentRequest = await db.findDocument(
+                    context,
+                    DATABASE_NAME,
+                    MATCH_TABLE,
+                    { initialSender: receiver.username, initialReceiver: sender.username }
+                    );
+
+                    if (receiverSentRequest)
+                    {
+                        //Match profiles
+                        result = await db.updateDocument(
+                        context,
+                        DATABASE_NAME,
+                        MATCH_TABLE,
+                        {initialSender: receiver.username, initialReceiver: sender.username},
+                        {$set: {matched: "true"}}
+                    );
+                    }
+                    else
+                    {
+                        //Send initial request
+                        result = await db.insertDocument(
+                            context,
+                            DATABASE_NAME,
+                            MATCH_TABLE,
+                            {
+                                initialSender: profile.username,
+                                initialReceiver: matchingProfile.username,
+                                matched: "false"
+                            }
+                        );
+                    }
+                }
+                else
+                {
+                    //request already sent
+                    console.error("ERROR: Match request already sent to this user.");
+                    result = "AlreadySent";
+                }
+            }
+            else
+            {
+                //already matched
+                console.error("ERROR: Profiles are already matched.");
+                result = "Matched";
+            }
+        }
+        else {
+            console.error("ERROR: Profile does not exist.");
+            result = "NotFound";
+        }
+    }
+    catch (e) {
+        console.error(e);
+    }
+    finally {
+        context?.close();
+    }
+
+    return result;
+};
+
+const reviewMatch = async (reviewerUsername, matchedUsername, reviewRating) => {
+    let context = undefined;
+    let result = undefined;
+
+    try {
+        context = await db.initDatabase(env.DB_URI);
+
+        let reviewerProfile = await db.findDocument(
+            context,
+            DATABASE_NAME,
+            PROFILE_TABLE,
+            { username: reviewerUsername }
+        );
+
+        let matchedProfile = await db.findDocument(
+            context,
+            DATABASE_NAME,
+            PROFILE_TABLE,
+            { username: matchedUsername }
+        );
+
+        if (!reviewerProfile || !matchedProfile) {
+            console.error("ERROR: Profile does not exist.");
+            result = "NotFound";
+        }
+        else {
+
+            let matchExists = await db.findDocument(
+                context,
+                DATABASE_NAME,
+                MATCH_TABLE,
+                { $or: [{initialSender: reviewerProfile.username, initialReceiver: matchedProfile.username, matched: "true"},
+                    {initialSender: matchedProfile.username, initialReceiver: reviewerProfile.username, matched: "true"}] 
+                }
+            );
+
+            if (matchExists)
+            {
+                if (reviewRating > 5 || reviewRating < 1)
+                {
+                    //Rating not 1-5
+                    console.error("ERROR: Rating is not in between 1-5.");
+                    result = "Rating";
+                }
+                else
+                {
+                    result = await db.insertDocument(
+                        context,
+                        DATABASE_NAME,
+                        REVIEW_TABLE,
+                        {
+                            reviewer: reviewerProfile.username,
+                            matched: matchedProfile.username,
+                            rating: reviewRating
+                        }
+                    );
+                }
+            }
+            else
+            {
+                //Profiles not matched
+                console.error("ERROR: Profiles are not matched.");
+                result = "NotMatched";
+            }
+        }
+    }
+    catch (e) {
+        console.error(e);
+    }
+    finally {
+        context?.close();
+    }
+
+    return result;
+};
+
 export {
     DATABASE_NAME,
     retrieveProfiles,
@@ -375,5 +622,8 @@ export {
     retrieveProfileByPrivacy,
     addNewProfile,
     authenticateProfile,
-    updatePartialProfile
+    updatePartialProfile,
+    matchProfiles,
+    retreiveMatchedProfiles,
+    reviewMatch
 };
