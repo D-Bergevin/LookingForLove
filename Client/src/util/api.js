@@ -175,6 +175,21 @@ const matches = {
             throw new Error(data?.error || 'Fauled to send match request')
         }
         return data;
+    },
+    async getMatches(username) {
+        const token = localStorage.getItem('authToken');
+
+        const res = await fetch(serverRoute(`matchingprofiles/${username}`), {
+            method: 'GET',
+            headers: {
+                ...headers,
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to fetch current matches');
+        return data;
     }
 }
 

@@ -21,68 +21,13 @@ function Matches({ user }) {
         return;
       }
 
-      const dummyMatches = [
-        {
-          id: 1,
-          username: "sarah01",
-          firstName: "Sarah",
-          lastName: "Khan",
-          age: 24,
-          displayedGender: "Female",
-          bio: "Love traveling, coffee, and deep conversations.",
-          location: {
-            city: "Lahore",
-            region: "Punjab",
-            country: "Pakistan",
-          },
-          interests: ["Travel", "Music", "Photography"],
-          skills: ["React", "Communication", "Design"],
-        },
-        {
-          id: 2,
-          username: "ali_dev",
-          firstName: "Ali",
-          lastName: "Raza",
-          age: 27,
-          displayedGender: "Male",
-          bio: "Frontend developer who enjoys gaming and hiking.",
-          location: {
-            city: "Karachi",
-            region: "Sindh",
-            country: "Pakistan",
-          },
-          interests: ["Gaming", "Hiking", "Tech"],
-          skills: ["JavaScript", "CSS", "Problem Solving"],
-        },
-        {
-          id: 3,
-          username: "zoyaWrites",
-          firstName: "Zoya",
-          lastName: "Ahmed",
-          age: 25,
-          displayedGender: "Female",
-          bio: "Book lover and content writer. Always curious.",
-          location: {
-            city: "Islamabad",
-            region: "ICT",
-            country: "Pakistan",
-          },
-          interests: ["Reading", "Writing", "Art"],
-          skills: ["Content Writing", "SEO", "Research"],
-        },
-      ];
-
       try {
         const res = await api.matches.getMatches(user.username);
 
-        if (Array.isArray(res) && res.length > 0) {
-          setMatches(res);
-        } else {
-          setMatches(dummyMatches);
-        }
+        setMatches(Array.isArray(res) ? res : [])
       } catch (err) {
-        toast.error("Failed to load matches. Showing dummy data.");
-        setMatches(dummyMatches);
+        toast.error("Failed to load matches.");
+        setMatches([]);
       }
     };
 
