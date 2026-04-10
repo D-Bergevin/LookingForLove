@@ -140,7 +140,7 @@ const matches = {
         return data;
     },
 
-    async getMatches(username) {
+    async getPotentialMatches(username) {
         const token = localStorage.getItem('authToken');
         const res = await fetch(serverRoute(`profilesbyinterest/${username}`), {
             method: 'GET',

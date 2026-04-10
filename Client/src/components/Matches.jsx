@@ -3,7 +3,7 @@ import * as api from "../util/api.js";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 
-function MatchesList({ user }) {
+function Matches({ user }) {
   const [matches, setMatches] = useState(null);
 
   //added states for match reviews and ratings
@@ -234,4 +234,4 @@ function MatchesList({ user }) {
   );
 }
 
-export default MatchesList;
+export default Matches;

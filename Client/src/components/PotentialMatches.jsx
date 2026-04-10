@@ -23,7 +23,7 @@ function PotentialMatches({ user }) {
       }
 
       try {
-        const res = await matches.getMatches(user.username);
+        const res = await matches.getPotentialMatches(user.username);
 
         if (Array.isArray(res)) {
           setPotentialMatches(res);
