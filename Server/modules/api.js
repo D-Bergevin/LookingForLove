@@ -9,7 +9,9 @@ import {
     addNewProfile,
     authenticateProfile,
     updatePartialProfile,
-    retrieveProfilesByInterest
+    retrieveProfilesByInterest,
+    matchProfiles,
+    retreiveMatchedProfiles
 } from './data.js';
 
 // The Express application object
@@ -61,6 +63,11 @@ app.get('/profilesbyinterest/:username', authenticateToken, async (_request, res
     response.json(profiles);
 });
 
+app.get('/matchingprofiles/:username', authenticateToken, async (_request, response) => {
+    let profiles = await retreiveMatchedProfiles(_request.params.username);
+    response.json(profiles);
+});
+
 app.get('/profiles/:username', authenticateToken, async (request, response) => {
     try {
         const profileUsername = request.params.username;
@@ -99,7 +106,6 @@ app.get('/profilesbyprivacy/:username', authenticateToken, async (request, respo
 
 app.post('/register', async (request, response) => {
     const newProfile = request.body;
-
     try {
         let result = await addNewProfile(newProfile);
 
@@ -185,6 +191,32 @@ app.put('/update', authenticateToken, async (request, response) => {
         response.sendStatus(500);
     }
 });
+
+app.put('/match/:senderUsername/:receiverUsername', async (request, response) => {
+
+    try {
+        const result = await matchProfiles(request.params.senderUsername, request.params.receiverUsername);
+
+        if (result === "NotFound") {
+            response.sendStatus(404);
+        }
+        else if (result === "Matched") {
+            response.sendStatus(409);
+        }
+        else if (result === "AlreadySent") {
+            response.sendStatus(400);
+        }
+        else {
+            response.json(result);
+        }
+    }
+    catch (e) {
+        console.error(e);
+        response.sendStatus(500);
+    }
+});
+
+
 
 const startServer = (port) => {
     app.listen(port, () => console.warn(`Listening on port ${port}`));
