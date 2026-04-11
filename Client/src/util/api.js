@@ -139,7 +139,25 @@ const matches = {
         if (!res.ok) throw new Error(data.error || 'Failed to fetch matches');
         return data;
     },
+    async getMutualMatchContact(username) {
+        const token = localStorage.getItem("authToken");
 
+        const res = await fetch(serverRoute(`contactinfo/${username}`), {
+            method: "GET",
+            headers: {
+                ...headers,
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.error || "Failed to fetch contact info");
+        }
+
+        return data;
+    },
     async getPotentialMatches(username) {
         const token = localStorage.getItem('authToken');
         const res = await fetch(serverRoute(`profilesbyinterest/${username}`), {
@@ -197,7 +215,7 @@ const matches = {
             headers: {
                 ...headers,
             },
-            body: JSON.stringify({review: review})
+            body: JSON.stringify({ review: review })
         });
         const data = await res.json();
         if (!res.ok) throw new Error('Failed to submit review');

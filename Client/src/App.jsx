@@ -178,11 +178,11 @@ function App() {
               </button>
             </Link>
 
-            <Link to="/interests">
+            {/* <Link to="/interests">
               <button type="button" style={navButtonStyle}>
                 Test Interests
               </button>
-            </Link>
+            </Link> */}
 
             <Link to="/potential-matches">
               <button type="button" style={navButtonStyle}>
@@ -196,11 +196,11 @@ function App() {
               </button>
             </Link>
 
-            <Link to="/skills">
+            {/* <Link to="/skills">
               <button type="button" style={navButtonStyle}>
                 Test Skills
               </button>
-            </Link>
+            </Link> */}
 
             <button
               type="button"
