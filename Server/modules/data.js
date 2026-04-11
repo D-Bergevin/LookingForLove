@@ -55,8 +55,34 @@ const retrieveProfilesByInterest = async (userUsername) => {
             { _id: 0, passwordHash: 0 }
         );
 
+        let existingMatches = await db.findDocuments(
+            context,
+            DATABASE_NAME,
+            MATCH_TABLE,
+            { $or: [{initialSender: userProfile.username},
+                    {initialReceiver: userProfile.username, matched:"true"}]
+            }
+        );
+
+        let existingUsernames = existingMatches.map(match => {
+            if (!match) return null;
+
+            if (match.initialSender === userUsername)
+            {
+                return match.initialReceiver
+            }
+            else if (match.initialReceiver === userUsername)
+            {
+                return match.initialSender;
+            }
+            else return null;
+
+        }).filter(matchUsername => matchUsername !== null);
+
+
         let filteredProfiles = profiles.map(profile => {
             if (!profile) return null;
+            if (existingUsernames.includes(profile.username)) return null;
 
             if (userProfile.datingPreference !== "A" && userProfile.datingPreference !== profile.displayedGender)
             {
