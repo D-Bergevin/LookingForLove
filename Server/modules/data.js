@@ -589,43 +589,63 @@ const reviewMatch = async (reviewerUsername, matchedUsername, review) => {
         }
         else {
 
-            let matchExists = await db.findDocument(
-                context,
-                DATABASE_NAME,
-                MATCH_TABLE,
-                { $or: [{initialSender: reviewerProfile.username, initialReceiver: matchedProfile.username, matched: "true"},
-                    {initialSender: matchedProfile.username, initialReceiver: reviewerProfile.username, matched: "true"}] 
-                }
+            let alreadyReviewed = await db.findDocument(
+            context,
+            DATABASE_NAME,
+            REVIEW_TABLE,
+            {reviewer: reviewerProfile.username, matched: matchedProfile.username}
             );
 
-            if (matchExists)
+            if (alreadyReviewed)
             {
-                if (review.rating > 5 || review.rating < 1)
-                {
-                    //Rating not 1-5
-                    console.error("ERROR: Rating is not in between 1-5.");
-                    result = "Rating";
-                }
-                else
-                {
-                    result = await db.insertDocument(
+                result = await db.updateDocument(
                         context,
                         DATABASE_NAME,
                         REVIEW_TABLE,
-                        {
-                            reviewer: reviewerProfile.username,
-                            matched: matchedProfile.username,
-                            rating: review.rating,
-                            comment: review.comment
-                        }
+                        {reviewer: reviewerProfile.username, matched: matchedProfile.username},
+                        {rating: review.rating, comment: review.comment}
                     );
-                }
             }
             else
             {
-                //Profiles not matched
-                console.error("ERROR: Profiles are not matched.");
-                result = "NotMatched";
+                let matchExists = await db.findDocument(
+                    context,
+                    DATABASE_NAME,
+                    MATCH_TABLE,
+                    { $or: [{initialSender: reviewerProfile.username, initialReceiver: matchedProfile.username, matched: "true"},
+                        {initialSender: matchedProfile.username, initialReceiver: reviewerProfile.username, matched: "true"}] 
+                    }
+                );
+
+                if (matchExists)
+                {
+                    if (review.rating > 5 || review.rating < 1)
+                    {
+                        //Rating not 1-5
+                        console.error("ERROR: Rating is not in between 1-5.");
+                        result = "Rating";
+                    }
+                    else
+                    {
+                        result = await db.insertDocument(
+                            context,
+                            DATABASE_NAME,
+                            REVIEW_TABLE,
+                            {
+                                reviewer: reviewerProfile.username,
+                                matched: matchedProfile.username,
+                                rating: review.rating,
+                                comment: review.comment
+                            }
+                        );
+                    }
+                }
+                else
+                {
+                    //Profiles not matched
+                    console.error("ERROR: Profiles are not matched.");
+                    result = "NotMatched";
+                }
             }
         }
     }

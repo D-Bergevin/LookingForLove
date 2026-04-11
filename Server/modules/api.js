@@ -218,10 +218,15 @@ app.put('/match/:senderUsername/:receiverUsername', async (request, response) =>
     }
 });
 
-app.put('/review/:reviewerUsername/:matchedUsername/:review', async (request, response) => {
+app.put('/review/:reviewerUsername/:matchedUsername', async (request, response) => {
+    let review = request.body.review;
+
+    if (!review) {
+        return response.status(400).send("Missing review");
+    }
 
     try {
-        const result = await reviewMatch(request.params.reviewerUsername, request.params.matchedUsername, request.params.review);
+        const result = await reviewMatch(request.params.reviewerUsername, request.params.matchedUsername, review);
 
         if (result === "NotFound") {
             response.sendStatus(404);
