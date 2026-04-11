@@ -14,7 +14,8 @@ import {
     retreiveMatchedProfiles,
     reviewMatch,
     retrieveReviewsByUsername,
-    retrieveContactInformation
+    retrieveContactInformation,
+    retrieveDashboardStats
 } from './data.js';
 
 // The Express application object
@@ -105,6 +106,11 @@ app.get('/contactinfo/:username', authenticateToken, async (request, response) =
         console.error(e);
         response.sendStatus(500);
     }
+});
+
+app.get('/dashboard', authenticateToken, async (_request, response) => {
+    let stats = await retrieveDashboardStats();
+    response.json(stats);
 });
 
 app.get('/profilesbyprivacy/:username', authenticateToken, async (request, response) => {

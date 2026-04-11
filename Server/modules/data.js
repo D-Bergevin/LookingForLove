@@ -239,6 +239,31 @@ const retrieveContactInformation = async (profileUsername) => {
     return contactInfo;
 };
 
+const retrieveDashboardStats = async () => {
+    let stats = null;
+    let context = undefined;
+
+    try {
+        context = await db.initDatabase(env.DB_URI);
+
+        stats = await db.findDocument(
+            context,
+            DATABASE_NAME,
+            DASHBOARD_TABLE,
+            { dashboard: "dashboard" },
+            { _id: 0, dashboard: 0 }
+        );
+    }
+    catch (e) {
+        console.error(e);
+    }
+    finally {
+        context?.close();
+    }
+
+    return stats;
+};
+
 const retrieveProfileByPrivacy = async (profileUsername) => {
     let profile = null;
     let context = undefined;
@@ -746,5 +771,6 @@ export {
     retreiveMatchedProfiles,
     reviewMatch,
     retrieveReviewsByUsername,
-    retrieveContactInformation
+    retrieveContactInformation,
+    retrieveDashboardStats
 };
