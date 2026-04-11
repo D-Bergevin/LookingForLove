@@ -1,36 +1,41 @@
-.container{
+.container {
     max-width: 500px;
     margin: 40px auto;
     padding: 25px;
 }
 
-h1{
+h1 {
     text-align: center;
 }
 
-h2{
+h2 {
     margin-bottom: 20px;
     text-align: center;
 }
 
-.form{
+.form {
     display: flex;
     flex-direction: column;
 }
 
-label{
+label {
     margin-top: 10px;
     font-weight: bold;
 }
 
-input{
+input {
+    width: 100%;
     padding: 8px;
     margin-top: 5px;
     border-radius: 5px;
     border: 1px solid #ccc;
 }
 
-button{
+select {
+    height: 35px;
+}
+
+button {
     margin-top: 20px;
     padding: 10px;
     background-color: darksalmon;
@@ -39,6 +44,119 @@ button{
     cursor: pointer;
 }
 
-button:hover{
+button:hover {
     background-color: deeppink;
+}
+
+.match-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: white;
+}
+
+.match-table th,
+.match-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+    vertical-align: top;
+    color: #1f2937;
+}
+
+.match-table th {
+    background-color: #f4f4f4;
+    color: #111827;
+    font-weight: 600;
+}
+
+.match-table tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+.match-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+.matches_container {
+    margin: 40px auto;
+    padding: 25px;
+}
+
+.star.active {
+    color: gold;
+}
+
+.star:hover {
+    color: blueviolet;
+}
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+}
+
+.review-modal {
+  background: #fff;
+  width: 100%;
+  max-width: 520px;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.review-modal h2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.star-row {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 16px;
+}
+
+.star {
+  background: transparent;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.star.active {
+  color: gold;
+}
+
+.review-modal textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 120px;
+  padding: 10px;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+}
+
+.review-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+.profile-text-center {
+    text-align: center;
+}
+.match-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.contact-info-list p {
+  margin: 8px 0;
 }
