@@ -6,6 +6,7 @@ const DATABASE_NAME = "LookingForLove";
 const PROFILE_TABLE = "profiles";
 const MATCH_TABLE = "matches";
 const REVIEW_TABLE = "reviews";
+const DASHBOARD_TABLE = "dashboard"
 const SALT_ROUNDS = 10;
 
 const retrieveProfiles = async () => {
@@ -245,6 +246,13 @@ const retrieveContactInformation = async (profileUsername) => {
         if (profile.email)
         {
             contactInfo = {email: profile.email};
+
+            dashboardResult = await db.updateDashboard(
+            context,
+            DATABASE_NAME,
+            DASHBOARD_TABLE,
+            {numCommunicationShares: 1}
+            );
         }
     }
     catch (e) {
@@ -255,6 +263,31 @@ const retrieveContactInformation = async (profileUsername) => {
     }
 
     return contactInfo;
+};
+
+const retrieveDashboardStats = async () => {
+    let stats = null;
+    let context = undefined;
+
+    try {
+        context = await db.initDatabase(env.DB_URI);
+
+        stats = await db.findDocument(
+            context,
+            DATABASE_NAME,
+            DASHBOARD_TABLE,
+            { dashboard: "dashboard" },
+            { _id: 0, dashboard: 0 }
+        );
+    }
+    catch (e) {
+        console.error(e);
+    }
+    finally {
+        context?.close();
+    }
+
+    return stats;
 };
 
 const retrieveProfileByPrivacy = async (profileUsername) => {
@@ -362,6 +395,39 @@ const addNewProfile = async (profile) => {
                 PROFILE_TABLE,
                 profileToInsert
             );
+
+            let dashboardResult = null;
+
+            if (profileToInsert.membership)
+            {
+                if (profileToInsert.membership === "Paid")
+                {
+                    dashboardResult = await db.updateDashboard(
+                    context,
+                    DATABASE_NAME,
+                    DASHBOARD_TABLE,
+                    {numPaidMembers: 1}  
+                    );
+                }
+                else
+                {
+                    dashboardResult = await db.updateDashboard(
+                    context,
+                    DATABASE_NAME,
+                    DASHBOARD_TABLE,
+                    {numFreeMembers: 1}
+                    );
+                }
+            }
+            else
+            {
+                dashboardResult = await db.updateDashboard(
+                context,
+                DATABASE_NAME,
+                DASHBOARD_TABLE,
+                {numFreeMembers: 1}  
+                );
+            }
         }
         else {
             console.error("ERROR: Profile already exists.");
@@ -484,7 +550,6 @@ const updatePartialProfile = async (criteria, update) => {
     return result;
 };
 
-//WIP
 const matchProfiles = async (senderUsername, receiverUsername) => {
     let context = undefined;
     let result = undefined;
@@ -545,7 +610,14 @@ const matchProfiles = async (senderUsername, receiverUsername) => {
                         MATCH_TABLE,
                         {initialSender: receiver.username, initialReceiver: sender.username},
                         {matched: "true"}
-                    );
+                        );
+
+                        let dashboardResult = await db.updateDashboard(
+                        context,
+                        DATABASE_NAME,
+                        DASHBOARD_TABLE,
+                        {numMatches: 1}  
+                        );
                     }
                     else
                     {
@@ -725,5 +797,6 @@ export {
     retreiveMatchedProfiles,
     reviewMatch,
     retrieveReviewsByUsername,
-    retrieveContactInformation
+    retrieveContactInformation,
+    retrieveDashboardStats
 };
