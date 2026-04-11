@@ -37,18 +37,6 @@ function App() {
   const [user, setUser] = useState(null);
   const [loadingUser, setLoadingUser] = useState(true);
 
-  const [testInterests, setTestInterests] = useState([
-    "Gaming",
-    "Music",
-    "Travel",
-  ]);
-
-  const [testSkills, setTestSkills] = useState([
-    "React",
-    "JavaScript",
-    "CSS",
-  ]);
-
   const navigate = useNavigate();
 
   const navButtonStyle = {
@@ -166,21 +154,15 @@ function App() {
           </>
         ) : (
           <>
+            <Link to="/profile-edit">
+              <button type="button" style={navButtonStyle}>
+                Edit Profile
+              </button>
+            </Link>
+
             <Link to="/profile">
               <button type="button" style={navButtonStyle}>
-                My Profile
-              </button>
-            </Link>
-
-            <Link to="/profile-view">
-              <button type="button" style={navButtonStyle}>
-                Test ProfileView
-              </button>
-            </Link>
-
-            <Link to="/interests">
-              <button type="button" style={navButtonStyle}>
-                Test Interests
+                ProfileView
               </button>
             </Link>
 
@@ -193,12 +175,6 @@ function App() {
             <Link to="/matches">
               <button type="button" style={navButtonStyle}>
                 Test Matches
-              </button>
-            </Link>
-
-            <Link to="/skills">
-              <button type="button" style={navButtonStyle}>
-                Test Skills
               </button>
             </Link>
 
@@ -261,7 +237,7 @@ function App() {
 
         {/* protected */}
         <Route
-          path="/profile"
+          path="/profile-edit"
           element={
             <ProtectedRoute
               isAuthenticated={isAuthenticated}
@@ -303,53 +279,13 @@ function App() {
         />
 
         <Route
-          path="/profile-view"
+          path="/profile"
           element={
             <ProtectedRoute
               isAuthenticated={isAuthenticated}
               loadingUser={loadingUser}
             >
               <ProfileView user={user} />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/interests"
-          element={
-            <ProtectedRoute
-              isAuthenticated={isAuthenticated}
-              loadingUser={loadingUser}
-            >
-              <div>
-                {testInterests.map((interest) => (
-                  <InterestDisplay
-                    key={interest}
-                    interest={interest}
-                    setInterests={setTestInterests}
-                  />
-                ))}
-              </div>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/skills"
-          element={
-            <ProtectedRoute
-              isAuthenticated={isAuthenticated}
-              loadingUser={loadingUser}
-            >
-              <div>
-                {testSkills.map((skill) => (
-                  <SkillDisplay
-                    key={skill}
-                    skill={skill}
-                    setSkills={setTestSkills}
-                  />
-                ))}
-              </div>
             </ProtectedRoute>
           }
         />

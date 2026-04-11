@@ -77,26 +77,6 @@ function ProfileEdit(props) {
           }
         />
 
-        {/* Passwords */}
-        <label>Old Password</label>
-        <input type="password" placeholder="Password" 
-           onChange={(e) =>
-            setTempUser({ ...tempUser, password: e.target.value })
-          }/>
-
-        <label>New Password</label>
-        <input type="password" placeholder="NewPassword"
-          onChange={(e) =>
-            setTempUser({ ...tempUser, newPassword: e.target.value })
-          }
-         />
-
-        <label>Confirm New Password</label>
-        <input type="password" placeholder="ConfirmNewPassword" 
-           onChange={(e) =>
-            setTempUser({ ...tempUser, confirmNewPassword: e.target.value })
-          }/>
-
         {/* First & Last Name */}
         <label>First Name</label>
         <input

@@ -146,7 +146,6 @@ function Matches({ user }) {
             <th>Username</th>
             <th>Gender</th>
             <th>Location</th>
-            <th>Bio</th>
             <th>Interests</th>
             <th>Skills</th>
             <th>Review</th>
@@ -169,7 +168,6 @@ function Matches({ user }) {
                   .filter(Boolean)
                   .join(", ") || "N/A"}
               </td>
-              <td>{profile.bio || "N/A"}</td>
               <td>
                 {Array.isArray(profile.interests)
                   ? profile.interests.join(", ")

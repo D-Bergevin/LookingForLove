@@ -7,8 +7,8 @@ function ProfileCreate(){
     const [user, setUser] = useState({});
     const [skills, setSkills] = useState([]);
     const [interests, setInterests] = useState([]);
-    function saveProfile(){//LF: Save user function which calls a post request to the server to save the profile to db. TODO: Needs error handling for invalid input as well as for password compare check.
-        setUser({...user, interests: interests, skills: skills});//LF:  Bring interests and skills into user before saving to db.
+    function saveProfile(){
+        setUser({...user, interests: interests, skills: skills});
         api.profile.saveUser(user);
     }
     return(
@@ -53,9 +53,8 @@ function ProfileCreate(){
             setInterests([...interests, interest]);
             document.querySelector('input[placeholder="Add interest"]').value = "";
         }}>Add Interest</button>
-        
-        {/*LF: Location inputs below. Was thinking of having privacyLevel affect which of these is shown on profile view for other users. For example, if privacyLevel is 0, everything is shown. If it's 1, everything but address is shown, 2 would be everything but address and city, etc.*/}
-        {/*LF: Was thinking of making everything but country optional*/}
+
+
         <label >Country</label>
         <input type="text" placeholder="Country" onChange={(e) => setUser({...user, country: e.target.value})}/>
         <label >Region</label>
@@ -64,16 +63,12 @@ function ProfileCreate(){
         <input type="text" placeholder="City/Town" onChange={(e) => setUser({...user, city: e.target.value})}/>
         <label >Address</label>
         <input type="text" placeholder="Street Address" onChange={(e) => setUser({...user, address: e.target.value})}/>
-        
-        {/*LF: Workplace and position inputs below. These will likely also be optional and have privacy levels assigned to them in some way. Maybe a two digit number where the first digit is location privacy whilst second is workplace privacy?*/}
         <label >Workplace</label>
         <input type="text" placeholder="Company" onChange={(e) => setUser({...user, workplace: e.target.value})}/>
-
         <label >Position</label>
         <input type="text" placeholder="Job Title / Position" onChange={(e) => setUser({...user, position: e.target.value})}/>
-
         <label >PrivacyLevel</label>
-        <input type="number" placeholder="0-10" onChange={(e) => setUser({...user, privacyLevel: e.target.value})}/>
+        <input type="number" placeholder="0-2" onChange={(e) => setUser({...user, privacyLevel: e.target.value})}/>
 
         <button type="button" onClick={() => {
             saveProfile();
