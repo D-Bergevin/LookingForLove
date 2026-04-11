@@ -5,14 +5,11 @@ import { toast } from "react-hot-toast";
 
 function Matches({ user }) {
   const [matches, setMatches] = useState(null);
-
-  //added states for match reviews and ratings
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
-  const [reviews, setReviews] = useState({})
+  const [reviews, setReviews] = useState({});
   const [submittingReview, setSubmittingReview] = useState(false);
-
 
   useEffect(() => {
     const loadMatches = async () => {
@@ -23,9 +20,9 @@ function Matches({ user }) {
 
       try {
         const res = await api.matches.getMatches(user.username);
-        setMatches(Array.isArray(res) ? res : [])
-      } 
-      catch{
+        setMatches(Array.isArray(res) ? res : []);
+      } catch (error) {
+        console.error("Failed to load matches:", error);
         toast.error("Failed to load matches.");
         setMatches([]);
       }
@@ -34,30 +31,56 @@ function Matches({ user }) {
     loadMatches();
   }, [user?.username]);
 
-  //saving reviews in local storage for now
   useEffect(() => {
     const loadReviews = async () => {
-      const savedReviews = await api.matches.getReviews(user.username);
-      if (savedReviews) {
-        setReviews(savedReviews);
+      if (!user?.username) {
+        setReviews({});
+        return;
+      }
+
+      try {
+        const savedReviews = await api.matches.getReviews(user.username);
+        if (savedReviews && typeof savedReviews === "object") {
+          setReviews(savedReviews);
+        } else {
+          setReviews({});
+        }
+      } catch (error) {
+        console.error("Failed to load reviews:", error);
+        setReviews({});
       }
     };
 
     loadReviews();
-  }, [user?.username, selectedMatch?.username]);
+  }, [user?.username]);
 
   useEffect(() => {
     localStorage.setItem("matchReviews", JSON.stringify(reviews));
   }, [reviews]);
 
+  useEffect(() => {
+    if (!selectedMatch) return;
+
+    const handleEscape = (e) => {
+      if (e.key === "Escape") {
+        cancelReview();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [selectedMatch]);
+
   const openReview = (profile) => {
     setSelectedMatch(profile);
 
-    if (reviews[profile.username]) {
-      setRating(reviews[profile.username].rating);
-      setComment(reviews[profile.username].comment);
-    }
-    else {
+    const existingReview = reviews[profile.username];
+    if (existingReview) {
+      setRating(existingReview.rating || 0);
+      setComment(existingReview.comment || "");
+    } else {
       setRating(0);
       setComment("");
     }
@@ -67,47 +90,45 @@ function Matches({ user }) {
     setSelectedMatch(null);
     setRating(0);
     setComment("");
-  }
+  };
 
   const submitReview = async () => {
     if (!selectedMatch) return;
 
     if (rating < 1 || rating > 5) {
-      toast.error("Invalid rating select a rating from 1 - 5:)");
+      toast.error("Select a rating from 1 to 5.");
       return;
     }
 
     try {
       setSubmittingReview(true);
 
-      // //save review locally TODO: Remove this and fetch reviews from server instead
-      // setReviews((prev) => ({
-      //   ...prev,
-      //   [selectedMatch.username]: {
-      //     rating,
-      //     comment,
-      //   },
-      // }));
-      //save review to server
-      setReviews(await api.matches.postReview(user.username, selectedMatch.username, { rating, comment }));
+      await api.matches.postReview(
+        user.username,
+        selectedMatch.username,
+        { rating, comment }
+      );
+
+      setReviews((prev) => ({
+        ...prev,
+        [selectedMatch.username]: {
+          rating,
+          comment,
+        },
+      }));
 
       toast.success("Review saved");
-      setSelectedMatch(null);
-      setRating(0);
-      setComment("");
-    }
-
-    catch{
-      toast.error("Failed to save review :(");
-    }
-
-    finally {
-      setSubmittingReview(false)
+      cancelReview();
+    } catch (error) {
+      console.error("Failed to save review:", error);
+      toast.error("Failed to save review.");
+    } finally {
+      setSubmittingReview(false);
     }
   };
 
   if (matches === null) {
-    return <div>Loading...</div>;
+    return <div>Loading Mutual Matches...</div>;
   }
 
   if (matches.length === 0) {
@@ -134,48 +155,91 @@ function Matches({ user }) {
         <tbody>
           {matches.map((profile, i) => (
             <tr key={profile.id || profile.username || i}>
-              <td>{`${profile.firstName || ""} ${profile.lastName || ""}`.trim() || "N/A"}</td>
+              <td>
+                {`${profile.firstName || ""} ${profile.lastName || ""}`.trim() || "N/A"}
+              </td>
               <td>{profile.username || "N/A"}</td>
               <td>{profile.displayedGender || "N/A"}</td>
               <td>
-                {[profile.location?.city, profile.location?.region, profile.location?.country]
+                {[
+                  profile.location?.city,
+                  profile.location?.region,
+                  profile.location?.country,
+                ]
                   .filter(Boolean)
                   .join(", ") || "N/A"}
               </td>
               <td>{profile.bio || "N/A"}</td>
-              <td>{Array.isArray(profile.interests) ? profile.interests.join(", ") : "N/A"}</td>
-              <td>{Array.isArray(profile.skills) ? profile.skills.join(", ") : "N/A"}</td>
               <td>
-                <button type="button" onClick={() => openReview(profile)}>{reviews[profile.username] ? "Edit Review" : "Leave Review"}</button>
+                {Array.isArray(profile.interests)
+                  ? profile.interests.join(", ")
+                  : "N/A"}
+              </td>
+              <td>
+                {Array.isArray(profile.skills)
+                  ? profile.skills.join(", ")
+                  : "N/A"}
+              </td>
+              <td>
+                <button
+                  type="button"
+                  onClick={() => openReview(profile)}
+                >
+                  {reviews[profile.username] ? "Edit Review" : "Leave Review"}
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      {/* review form for selected user */}
       {selectedMatch && (
-        <div className="review-box">
-          <h2>
-            Review {selectedMatch.firstName} {selectedMatch.lastName}
-          </h2>
+        <div className="modal-overlay" onClick={cancelReview}>
+          <div
+            className="review-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2>
+              Review {selectedMatch.firstName} {selectedMatch.lastName}
+            </h2>
 
-          {/* cool star rating */}
-          <div className="star-row">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button key={star} type="button" className={star <= rating ? "star active" : "star"} onClick={() => setRating(star)}>
-                ★
+            <div className="star-row">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  className={star <= rating ? "star active" : "star"}
+                  onClick={() => setRating(star)}
+                >
+                  ★
+                </button>
+              ))}
+            </div>
+
+            <textarea
+              rows="4"
+              placeholder="Write your review"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+            />
+
+            <div className="review-actions">
+              <button
+                type="button"
+                onClick={submitReview}
+                disabled={submittingReview}
+              >
+                {submittingReview ? "Saving..." : "Submit Review"}
               </button>
-            ))}
-          </div>
 
-          <textarea rows="4" placeholder="Review" value={comment} onChange={(e) => setComment(e.target.value)} />
-
-          <div>
-            <button onClick={submitReview} disabled={submittingReview}>
-              {submittingReview ? "Saving..." : "Submit Review"}
-            </button>
-            <button onClick={cancelReview}>Cancel</button>
+              <button
+                type="button"
+                onClick={cancelReview}
+                disabled={submittingReview}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}

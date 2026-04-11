@@ -5,14 +5,13 @@ import "./ProfileTest.css";
 
 function PotentialMatches({ user }) {
   const [potentialMatches, setPotentialMatches] = useState(null);
+  const [pendingRequests, setPendingRequests] = useState(new Set());
 
   const getSharedInterests = (currentUser, profile) => {
     const userInterests = Array.isArray(currentUser?.interests) ? currentUser.interests : [];
     const profileInterests = Array.isArray(profile?.interests) ? profile.interests : [];
 
-    return profileInterests.filter((interest) =>
-      userInterests.includes(interest)
-    );
+    return profileInterests.filter((interest) => userInterests.includes(interest));
   };
 
   useEffect(() => {
@@ -38,27 +37,37 @@ function PotentialMatches({ user }) {
     };
 
     fetchPotentialMatches();
-  }, [user]);
+  }, [user?.username]);
 
-  //TO DO put in match request logic
   const requestMatch = async (profile) => {
     try {
       if (!profile?.username) {
-        toast.error("Profile missing username somehow??")
+        toast.error("Profile missing username");
         return;
       }
 
+      if (pendingRequests.has(profile.username)) {
+        return;
+      }
+
+      setPendingRequests((prev) => new Set(prev).add(profile.username));
+
       await matches.requestMatch(user.username, profile.username);
 
-      toast.success(`Match request sent to ${profile.username}`)
+      toast.success(`Match request sent to ${profile.username}`);
 
       setPotentialMatches((prev) =>
         prev.filter((p) => p.username !== profile.username)
       );
-    }
-    catch (err) {
-      console.error("Failed to send match request: ", err)
-      toast.error(err.message || "failed to send match request");
+    } catch (err) {
+      console.error("Failed to send match request:", err);
+      toast.error(err.message || "Failed to send match request");
+    } finally {
+      setPendingRequests((prev) => {
+        const updated = new Set(prev);
+        updated.delete(profile.username);
+        return updated;
+      });
     }
   };
 
@@ -90,11 +99,12 @@ function PotentialMatches({ user }) {
         <tbody>
           {potentialMatches.map((profile, i) => {
             const sharedInterests = getSharedInterests(user, profile);
+            const isPending = pendingRequests.has(profile.username);
+
             return (
               <tr key={profile.username || i}>
                 <td>
-                  {`${profile.firstName || ""} ${profile.lastName || ""}`.trim() ||
-                    "N/A"}
+                  {`${profile.firstName || ""} ${profile.lastName || ""}`.trim() || "N/A"}
                 </td>
                 <td>{profile.username || "N/A"}</td>
                 <td>{profile.displayedGender || "N/A"}</td>
@@ -117,7 +127,13 @@ function PotentialMatches({ user }) {
                   {Array.isArray(profile.skills) ? profile.skills.join(", ") : "N/A"}
                 </td>
                 <td>
-                  <button onClick={() => requestMatch(profile)}>Request Match</button>
+                  <button
+                    type="button"
+                    onClick={() => requestMatch(profile)}
+                    disabled={isPending}
+                  >
+                    {isPending ? "Sending..." : "Request Match"}
+                  </button>
                 </td>
               </tr>
             );
