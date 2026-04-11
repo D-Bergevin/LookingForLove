@@ -96,7 +96,7 @@ app.get('/contactinfo/:username', authenticateToken, async (request, response) =
 
         let contactInfo = await retrieveContactInformation(profileUsername);
 
-        if (profile) {
+        if (contactInfo) {
             response.json(contactInfo);
         } else {
             response.status(404).json({ error: "Profile not found" });
