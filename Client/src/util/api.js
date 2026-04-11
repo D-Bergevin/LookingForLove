@@ -192,9 +192,10 @@ const matches = {
         return data;
     },
     async postReview(senderUsername, receiverUsername, review) {
-        const res = await fetch(serverRoute(`review/${senderUsername}/${receiverUsername}/${review}`), {
+        const res = await fetch(serverRoute(`review/${senderUsername}/${receiverUsername}`), {
             method: 'PUT',
-            headers
+            headers,
+            body: {review: review}
         });
         const data = await res.json();
         if (!res.ok) throw new Error('Failed to submit review');
