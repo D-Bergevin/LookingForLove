@@ -148,3 +148,6 @@ button:hover {
   gap: 10px;
   justify-content: flex-end;
 }
+.profile-text-center {
+    text-align: center;
+}
