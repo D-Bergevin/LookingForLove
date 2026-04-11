@@ -601,7 +601,7 @@ const reviewMatch = async (reviewerUsername, matchedUsername, review) => {
                 result = await db.updateDocument(
                         context,
                         DATABASE_NAME,
-                        PROFILE_TABLE,
+                        REVIEW_TABLE,
                         {reviewer: reviewerProfile.username, matched: matchedProfile.username},
                         {rating: review.rating, comment: review.comment}
                     );
