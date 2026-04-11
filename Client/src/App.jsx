@@ -1,33 +1,55 @@
 import { useEffect, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
+import {
+  Routes,
+  Route,
+  Navigate,
+  Link,
+  useNavigate,
+  useLocation,
+} from "react-router";
+
 import Matches from "./components/Matches.jsx";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 import ProfileEdit from "./components/ProfileEdit";
-import { profile } from "./util/api.js";
-
-// dev components
 import ProfileView from "./components/ProfileView.jsx";
 import InterestDisplay from "./components/InterestDisplay.jsx";
 import SkillDisplay from "./components/SkillDisplay.jsx";
 import PotentialMatches from "./components/PotentialMatches.jsx";
+import { profile } from "./util/api.js";
+
+function ProtectedRoute({ isAuthenticated, loadingUser, children }) {
+  const location = useLocation();
+
+  if (loadingUser) {
+    return <div style={{ padding: "20px" }}>Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+
+  return children;
+}
 
 function App() {
-  const [page, setPage] = useState("login");
   const [user, setUser] = useState(null);
   const [loadingUser, setLoadingUser] = useState(true);
 
-  // test data for dev buttons
   const [testInterests, setTestInterests] = useState([
     "Gaming",
     "Music",
     "Travel",
   ]);
+
   const [testSkills, setTestSkills] = useState([
     "React",
     "JavaScript",
     "CSS",
   ]);
+
+  const navigate = useNavigate();
 
   const navButtonStyle = {
     padding: "5px",
@@ -70,7 +92,7 @@ function App() {
       localStorage.setItem("username", normalizedUser.username);
 
       if (redirectToProfile) {
-        setPage("profile");
+        navigate("/profile", { replace: true });
       }
     } catch (e) {
       console.error("Failed to load user profile:", e);
@@ -79,7 +101,7 @@ function App() {
       localStorage.removeItem("authToken");
       localStorage.removeItem("username");
       setUser(null);
-      setPage("login");
+      navigate("/login", { replace: true });
     } finally {
       setLoadingUser(false);
     }
@@ -92,15 +114,13 @@ function App() {
 
       if (!token) {
         setLoadingUser(false);
-        setPage("login");
         return;
       }
 
       if (savedUsername) {
-        await fetchUserProfile(savedUsername, true);
+        await fetchUserProfile(savedUsername, false);
       } else {
         setLoadingUser(false);
-        setPage("login");
       }
     };
 
@@ -111,24 +131,14 @@ function App() {
     localStorage.removeItem("authToken");
     localStorage.removeItem("username");
     setUser(null);
-    setPage("login");
     toast.success("Logged out successfully");
+    navigate("/login", { replace: true });
   };
-
-  if (loadingUser) {
-    return (
-      <>
-        <Toaster position="top-right" />
-        <div style={{ padding: "20px" }}>Loading...</div>
-      </>
-    );
-  }
 
   return (
     <>
       <Toaster position="top-right" />
 
-      {/* NAVIGATION */}
       <div
         style={{
           padding: "10px 16px",
@@ -142,66 +152,58 @@ function App() {
       >
         {!isAuthenticated ? (
           <>
-            <button
-              onClick={() => setPage("login")}
-              style={navButtonStyle}
-            >
-              Login
-            </button>
+            <Link to="/login">
+              <button type="button" style={navButtonStyle}>
+                Login
+              </button>
+            </Link>
 
-            <button
-              onClick={() => setPage("signup")}
-              style={navButtonStyle}
-            >
-              Signup
-            </button>
+            <Link to="/signup">
+              <button type="button" style={navButtonStyle}>
+                Signup
+              </button>
+            </Link>
           </>
         ) : (
           <>
-            <button
-              onClick={() => setPage("profile")}
-              style={navButtonStyle}
-            >
-              My Profile
-            </button>
+            <Link to="/profile">
+              <button type="button" style={navButtonStyle}>
+                My Profile
+              </button>
+            </Link>
 
-            {/* keep these only if needed for dev testing */}
-            <button
-              onClick={() => setPage("profileView")}
-              style={navButtonStyle}
-            >
-              Test ProfileView
-            </button>
+            <Link to="/profile-view">
+              <button type="button" style={navButtonStyle}>
+                Test ProfileView
+              </button>
+            </Link>
 
-            <button
-              onClick={() => setPage("testInterest")}
-              style={navButtonStyle}
-            >
-              Test Interests
-            </button>
+            <Link to="/interests">
+              <button type="button" style={navButtonStyle}>
+                Test Interests
+              </button>
+            </Link>
 
-            <button
-              onClick={() => setPage("testPotentialMatches")}
-              style={navButtonStyle}
-            >
-              Test Potential Matches
-            </button>
+            <Link to="/potential-matches">
+              <button type="button" style={navButtonStyle}>
+                Test Potential Matches
+              </button>
+            </Link>
 
-            <button
-              onClick={() => setPage("testMatches")}
-              style={navButtonStyle}
-            >
-              Test Matches
-            </button>
+            <Link to="/matches">
+              <button type="button" style={navButtonStyle}>
+                Test Matches
+              </button>
+            </Link>
 
-            <button
-              onClick={() => setPage("testSkills")}
-              style={navButtonStyle}
-            >
-              Test Skills
-            </button>
+            <Link to="/skills">
+              <button type="button" style={navButtonStyle}>
+                Test Skills
+              </button>
+            </Link>
 
             <button
+              type="button"
               onClick={handleLogout}
               style={{ ...navButtonStyle, marginLeft: "auto" }}
             >
@@ -211,98 +213,174 @@ function App() {
         )}
       </div>
 
-      {/* PUBLIC PAGES */}
-      {!isAuthenticated && page === "login" && (
-        <Login
-          setUser={async (u) => {
-            if (u?.username) {
-              localStorage.setItem("username", u.username);
-              await fetchUserProfile(u.username, true);
-            } else {
-              toast.error("Username not found after login");
-            }
-          }}
-          goToSignup={() => setPage("signup")}
+      <Routes>
+        {/* default route */}
+        <Route
+          path="/"
+          element={
+            isAuthenticated ? (
+              <Navigate to="/profile" replace />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
         />
-      )}
 
-      {!isAuthenticated && page === "signup" && (
-        <Signup goToLogin={() => setPage("login")} />
-      )}
+        {/* public */}
+        <Route
+          path="/login"
+          element={
+            isAuthenticated ? (
+              <Navigate to="/profile" replace />
+            ) : (
+              <Login
+                setUser={async (u) => {
+                  if (u?.username) {
+                    localStorage.setItem("username", u.username);
+                    await fetchUserProfile(u.username, true);
+                  } else {
+                    toast.error("Username not found after login");
+                  }
+                }}
+                goToSignup={() => navigate("/signup")}
+              />
+            )
+          }
+        />
 
-      {/* PROTECTED PAGES */}
-      {isAuthenticated && page === "profile" && (
-        <>
-          <div
-            className="d-flex align-items-center"
-            style={{
-              width: "100%",
-              backgroundColor: "blue",
-              color: "white",
-              padding: "15px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxSizing: "border-box",
-            }}
-          >
-            <h1
-              style={{
-                margin: 0,
-                textAlign: "center",
-                fontWeight: "bold",
-              }}
+        <Route
+          path="/signup"
+          element={
+            isAuthenticated ? (
+              <Navigate to="/profile" replace />
+            ) : (
+              <Signup goToLogin={() => navigate("/login")} />
+            )
+          }
+        />
+
+        {/* protected */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute
+              isAuthenticated={isAuthenticated}
+              loadingUser={loadingUser}
             >
-              Looking For Love Profile Editor
-            </h1>
-          </div>
+              <>
+                <div
+                  className="d-flex align-items-center"
+                  style={{
+                    width: "100%",
+                    backgroundColor: "blue",
+                    color: "white",
+                    padding: "15px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxSizing: "border-box",
+                  }}
+                >
+                  <h1
+                    style={{
+                      margin: 0,
+                      textAlign: "center",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Looking For Love Profile Editor
+                  </h1>
+                </div>
 
-          {user ? (
-            <ProfileEdit user={user} setUser={setUser} />
-          ) : (
-            <div className="spinner">Loading profile...</div>
-          )}
-        </>
-      )}
+                {user ? (
+                  <ProfileEdit user={user} setUser={setUser} />
+                ) : (
+                  <div className="spinner">Loading profile...</div>
+                )}
+              </>
+            </ProtectedRoute>
+          }
+        />
 
-      {isAuthenticated && page === "profileView" && (
-        <ProfileView user={user} />
-      )}
+        <Route
+          path="/profile-view"
+          element={
+            <ProtectedRoute
+              isAuthenticated={isAuthenticated}
+              loadingUser={loadingUser}
+            >
+              <ProfileView user={user} />
+            </ProtectedRoute>
+          }
+        />
 
-      {isAuthenticated && page === "testInterest" && (
-        <div>
-          {testInterests.map((interest) => (
-            <InterestDisplay
-              key={interest}
-              interest={interest}
-              setInterests={setTestInterests}
-            />
-          ))}
-        </div>
-      )}
+        <Route
+          path="/interests"
+          element={
+            <ProtectedRoute
+              isAuthenticated={isAuthenticated}
+              loadingUser={loadingUser}
+            >
+              <div>
+                {testInterests.map((interest) => (
+                  <InterestDisplay
+                    key={interest}
+                    interest={interest}
+                    setInterests={setTestInterests}
+                  />
+                ))}
+              </div>
+            </ProtectedRoute>
+          }
+        />
 
-      {isAuthenticated && page === "testSkills" && (
-        <div>
-          {testSkills.map((skill) => (
-            <SkillDisplay
-              key={skill}
-              skill={skill}
-              setSkills={setTestSkills}
-            />
-          ))}
-        </div>
-      )}
+        <Route
+          path="/skills"
+          element={
+            <ProtectedRoute
+              isAuthenticated={isAuthenticated}
+              loadingUser={loadingUser}
+            >
+              <div>
+                {testSkills.map((skill) => (
+                  <SkillDisplay
+                    key={skill}
+                    skill={skill}
+                    setSkills={setTestSkills}
+                  />
+                ))}
+              </div>
+            </ProtectedRoute>
+          }
+        />
 
-      {isAuthenticated && page === "testMatches" && (
-        <div>
-          {<Matches user={user} />}
-        </div>
-      )}
-      {isAuthenticated && page === "testPotentialMatches" && (
-        <div>
-          {<PotentialMatches user={user} />}
-        </div>
-      )}
+        <Route
+          path="/matches"
+          element={
+            <ProtectedRoute
+              isAuthenticated={isAuthenticated}
+              loadingUser={loadingUser}
+            >
+              <Matches user={user} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/potential-matches"
+          element={
+            <ProtectedRoute
+              isAuthenticated={isAuthenticated}
+              loadingUser={loadingUser}
+            >
+              <PotentialMatches user={user} />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </>
   );
 }
