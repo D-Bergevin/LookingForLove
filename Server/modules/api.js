@@ -13,7 +13,8 @@ import {
     matchProfiles,
     retreiveMatchedProfiles,
     reviewMatch,
-    retrieveReviewsByUsername
+    retrieveReviewsByUsername,
+    retrieveContactInformation
 } from './data.js';
 
 // The Express application object
@@ -78,6 +79,24 @@ app.get('/profiles/:username', authenticateToken, async (request, response) => {
 
         if (profile) {
             response.json(profile);
+        } else {
+            response.status(404).json({ error: "Profile not found" });
+        }
+    }
+    catch (e) {
+        console.error(e);
+        response.sendStatus(500);
+    }
+});
+
+app.get('/contactinfo/:username', authenticateToken, async (request, response) => {
+    try {
+        const profileUsername = request.params.username;
+
+        let contactInfo = await retrieveProfile(profileUsername);
+
+        if (profile) {
+            response.json(contactInfo);
         } else {
             response.status(404).json({ error: "Profile not found" });
         }

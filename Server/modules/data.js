@@ -202,7 +202,34 @@ const retrieveProfile = async (profileUsername) => {
     return profile;
 };
 
+const retrieveContactInformation = async (profileUsername) => {
+    let contactInfo = null;
+    let context = undefined;
 
+    try {
+        context = await db.initDatabase(env.DB_URI);
+
+        let profile = await db.findDocument(
+            context,
+            DATABASE_NAME,
+            PROFILE_TABLE,
+            { username: profileUsername }
+        );
+
+        if (profile.email)
+        {
+            contactInfo = {email: profile.email};
+        }
+    }
+    catch (e) {
+        console.error(e);
+    }
+    finally {
+        context?.close();
+    }
+
+    return contactInfo;
+};
 
 const retrieveProfileByPrivacy = async (profileUsername) => {
     let profile = null;
@@ -671,5 +698,6 @@ export {
     matchProfiles,
     retreiveMatchedProfiles,
     reviewMatch,
-    retrieveReviewsByUsername
+    retrieveReviewsByUsername,
+    retrieveContactInformation
 };
