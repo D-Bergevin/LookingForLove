@@ -93,7 +93,7 @@ app.get('/contactinfo/:username', authenticateToken, async (request, response) =
     try {
         const profileUsername = request.params.username;
 
-        let contactInfo = await retrieveProfile(profileUsername);
+        let contactInfo = await retrieveContactInformation(profileUsername);
 
         if (profile) {
             response.json(contactInfo);
