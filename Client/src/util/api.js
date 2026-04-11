@@ -197,7 +197,7 @@ const matches = {
             headers: {
                 ...headers,
             },
-            body: JSON.stringify({review: review})
+            body: JSON.stringify({ review: review })
         });
         const data = await res.json();
         if (!res.ok) throw new Error('Failed to submit review');

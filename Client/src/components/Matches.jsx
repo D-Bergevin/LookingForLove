@@ -11,6 +11,10 @@ function Matches({ user }) {
   const [reviews, setReviews] = useState({});
   const [submittingReview, setSubmittingReview] = useState(false);
 
+  const [contactModalMatch, setContactModalMatch] = useState(null);
+  const [contactInfo, setContactInfo] = useState(null);
+  const [loadingContactInfo, setLoadingContactInfo] = useState(false);
+
   useEffect(() => {
     const loadMatches = async () => {
       if (!user?.username) {
@@ -59,11 +63,12 @@ function Matches({ user }) {
   }, [reviews]);
 
   useEffect(() => {
-    if (!selectedMatch) return;
+    if (!selectedMatch && !contactModalMatch) return;
 
     const handleEscape = (e) => {
       if (e.key === "Escape") {
         cancelReview();
+        closeContactModal();
       }
     };
 
@@ -71,7 +76,7 @@ function Matches({ user }) {
     return () => {
       document.removeEventListener("keydown", handleEscape);
     };
-  }, [selectedMatch]);
+  }, [selectedMatch, contactModalMatch]);
 
   const openReview = (profile) => {
     setSelectedMatch(profile);
@@ -127,6 +132,69 @@ function Matches({ user }) {
     }
   };
 
+  const openContactModal = async (profile) => {
+    try {
+      setContactModalMatch(profile);
+      setContactInfo(null);
+      setLoadingContactInfo(true);
+
+      const data = await api.matches.getMutualMatchContact(profile.username);
+      setContactInfo(data);
+    } catch (error) {
+      console.error("Failed to load contact info:", error);
+      toast.error("Failed to load contact info.");
+      setContactInfo(null);
+    } finally {
+      setLoadingContactInfo(false);
+    }
+  };
+
+  const closeContactModal = () => {
+    setContactModalMatch(null);
+    setContactInfo(null);
+    setLoadingContactInfo(false);
+  };
+
+  const formatLabel = (key) => {
+    return key
+      .replace(/([A-Z])/g, " $1")
+      .replace(/_/g, " ")
+      .replace(/^./, (str) => str.toUpperCase());
+  };
+
+  const renderContactInfo = () => {
+    if (loadingContactInfo) {
+      return <p>Loading contact info...</p>;
+    }
+
+    if (!contactInfo || typeof contactInfo !== "object") {
+      return <p>No contact info found.</p>;
+    }
+
+    const entries = Object.entries(contactInfo).filter(([_, value]) => {
+      return (
+        value !== null &&
+        value !== undefined &&
+        value !== "" &&
+        ["string", "number", "boolean"].includes(typeof value)
+      );
+    });
+
+    if (entries.length === 0) {
+      return <p>No contact info available.</p>;
+    }
+
+    return (
+      <div className="contact-info-list">
+        {entries.map(([key, value]) => (
+          <p key={key}>
+            <strong>{formatLabel(key)}:</strong> {String(value)}
+          </p>
+        ))}
+      </div>
+    );
+  };
+
   if (matches === null) {
     return <div>Loading Mutual Matches...</div>;
   }
@@ -148,7 +216,7 @@ function Matches({ user }) {
             <th>Location</th>
             <th>Interests</th>
             <th>Skills</th>
-            <th>Review</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -179,12 +247,21 @@ function Matches({ user }) {
                   : "N/A"}
               </td>
               <td>
-                <button
-                  type="button"
-                  onClick={() => openReview(profile)}
-                >
-                  {reviews[profile.username] ? "Edit Review" : "Leave Review"}
-                </button>
+                <div className="match-actions">
+                  <button
+                    type="button"
+                    onClick={() => openReview(profile)}
+                  >
+                    {reviews[profile.username] ? "Edit Review" : "Leave Review"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => openContactModal(profile)}
+                  >
+                    View Contact
+                  </button>
+                </div>
               </td>
             </tr>
           ))}
@@ -236,6 +313,31 @@ function Matches({ user }) {
                 disabled={submittingReview}
               >
                 Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {contactModalMatch && (
+        <div className="modal-overlay" onClick={closeContactModal}>
+          <div
+            className="review-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2>
+              Contact Info for {contactModalMatch.firstName} {contactModalMatch.lastName}
+            </h2>
+
+            {renderContactInfo()}
+
+            <div className="review-actions">
+              <button
+                type="button"
+                onClick={closeContactModal}
+                disabled={loadingContactInfo}
+              >
+                Close
               </button>
             </div>
           </div>

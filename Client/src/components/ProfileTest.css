@@ -151,3 +151,12 @@ button:hover {
 .profile-text-center {
     text-align: center;
 }
+.match-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.contact-info-list p {
+  margin: 8px 0;
+}
