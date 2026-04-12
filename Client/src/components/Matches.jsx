@@ -1,4 +1,4 @@
-import "./ProfileTest.css";
+import "./Profile.css";
 import * as api from "../util/api.js";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";

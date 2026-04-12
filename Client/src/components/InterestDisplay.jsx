@@ -1,4 +1,4 @@
-import "./ProfileTest.css";
+import "./Profile.css";
 
 function InterestDisplay({ interest, setInterests }) {
   return (

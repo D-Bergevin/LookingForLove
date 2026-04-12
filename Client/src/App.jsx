@@ -12,10 +12,7 @@ import {
 import Matches from "./components/Matches.jsx";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
-import ProfileEdit from "./components/ProfileEdit";
 import ProfileView from "./components/ProfileView.jsx";
-import InterestDisplay from "./components/InterestDisplay.jsx";
-import SkillDisplay from "./components/SkillDisplay.jsx";
 import PotentialMatches from "./components/PotentialMatches.jsx";
 import { profile } from "./util/api.js";
 
@@ -154,12 +151,6 @@ function App() {
           </>
         ) : (
           <>
-            <Link to="/profile-edit">
-              <button type="button" style={navButtonStyle}>
-                Edit Profile
-              </button>
-            </Link>
-
             <Link to="/profile">
               <button type="button" style={navButtonStyle}>
                 ProfileView
@@ -235,49 +226,6 @@ function App() {
           }
         />
 
-        {/* protected */}
-        <Route
-          path="/profile-edit"
-          element={
-            <ProtectedRoute
-              isAuthenticated={isAuthenticated}
-              loadingUser={loadingUser}
-            >
-              <>
-                <div
-                  className="d-flex align-items-center"
-                  style={{
-                    width: "100%",
-                    backgroundColor: "blue",
-                    color: "white",
-                    padding: "15px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    boxSizing: "border-box",
-                  }}
-                >
-                  <h1
-                    style={{
-                      margin: 0,
-                      textAlign: "center",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Looking For Love Profile Editor
-                  </h1>
-                </div>
-
-                {user ? (
-                  <ProfileEdit user={user} setUser={setUser} />
-                ) : (
-                  <div className="spinner">Loading profile...</div>
-                )}
-              </>
-            </ProtectedRoute>
-          }
-        />
-
         <Route
           path="/profile"
           element={
@@ -285,7 +233,7 @@ function App() {
               isAuthenticated={isAuthenticated}
               loadingUser={loadingUser}
             >
-              <ProfileView user={user} />
+              <ProfileView user={user} setUser={setUser} />
             </ProtectedRoute>
           }
         />

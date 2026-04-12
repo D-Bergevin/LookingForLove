@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { matches } from "../util/api.js";
-import "./ProfileTest.css";
+import "./Profile.css";
 
 function PotentialMatches({ user }) {
   const [potentialMatches, setPotentialMatches] = useState(null);
