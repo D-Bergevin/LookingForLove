@@ -1,4 +1,4 @@
-import "./ProfileTest.css";
+import "./Profile.css";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import * as api from "../util/api.js";
@@ -49,7 +49,7 @@ function Signup({ goToLogin }) {
         goToLogin();
       }
     
-    } catch (e) {
+    } catch {
       toast.error("Signup failed - Duplicate email or username");
     }
 

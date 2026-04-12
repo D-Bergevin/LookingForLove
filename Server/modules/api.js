@@ -12,7 +12,10 @@ import {
     retrieveProfilesByInterest,
     matchProfiles,
     retreiveMatchedProfiles,
-    reviewMatch
+    reviewMatch,
+    retrieveReviewsByUsername,
+    retrieveContactInformation,
+    retrieveDashboardStats
 } from './data.js';
 
 // The Express application object
@@ -85,6 +88,46 @@ app.get('/profiles/:username', authenticateToken, async (request, response) => {
         console.error(e);
         response.sendStatus(500);
     }
+});
+
+app.get('/contactinfo/:username', authenticateToken, async (request, response) => {
+    try {
+        const profileUsername = request.params.username;
+
+        let contactInfo = await retrieveContactInformation(profileUsername);
+
+        if (contactInfo) {
+            response.json(contactInfo);
+        } else {
+            response.status(404).json({ error: "Profile not found" });
+        }
+    }
+    catch (e) {
+        console.error(e);
+        response.sendStatus(500);
+    }
+});
+
+app.get('/dashboard/:password', authenticateToken, async (_request, response) => {
+    let adminPassword = _request.params.password;
+    let stats = null;
+    if (adminPassword)
+    {
+        if (adminPassword === "group6adminpassword")
+        {
+            stats = await retrieveDashboardStats();
+        }
+        else
+        {
+            response.status(500).json({ error: "Incorrect password." });
+        }
+    }
+    else
+    {
+        response.status(500).json({ error: "Incorrect password." });
+    }
+    
+    response.json(stats);
 });
 
 app.get('/profilesbyprivacy/:username', authenticateToken, async (request, response) => {
@@ -217,10 +260,15 @@ app.put('/match/:senderUsername/:receiverUsername', async (request, response) =>
     }
 });
 
-app.put('/match/:reviewerUsername/:matchedUsername/:reviewRating', async (request, response) => {
+app.put('/review/:reviewerUsername/:matchedUsername', async (request, response) => {
+    let review = request.body.review;
+
+    if (!review) {
+        return response.status(400).send("Missing review");
+    }
 
     try {
-        const result = await reviewMatch(request.params.reviewerUsername, request.params.matchedUsername, request.params.reviewRating);
+        const result = await reviewMatch(request.params.reviewerUsername, request.params.matchedUsername, review);
 
         if (result === "NotFound") {
             response.sendStatus(404);
@@ -233,6 +281,24 @@ app.put('/match/:reviewerUsername/:matchedUsername/:reviewRating', async (reques
         }
         else {
             response.json(result);
+        }
+    }
+    catch (e) {
+        console.error(e);
+        response.sendStatus(500);
+    }
+});
+
+app.get('/review/:senderUsername', authenticateToken, async (request, response) => {
+    try {
+        const senderUsername = request.params.senderUsername;
+
+        let reviews = await retrieveReviewsByUsername(senderUsername);
+
+        if (reviews) {
+            response.json(reviews);
+        } else {
+            response.status(404).json({ error: "Reviews not found" });
         }
     }
     catch (e) {

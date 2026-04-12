@@ -1,36 +1,42 @@
 import { useEffect, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
+import {
+  Routes,
+  Route,
+  Navigate,
+  NavLink,
+  useNavigate,
+  useLocation,
+} from "react-router";
+
 import Matches from "./components/Matches.jsx";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
-import ProfileEdit from "./components/ProfileEdit";
-import { profile } from "./util/api.js";
-
-// dev components
 import ProfileView from "./components/ProfileView.jsx";
-import InterestDisplay from "./components/InterestDisplay.jsx";
-import SkillDisplay from "./components/SkillDisplay.jsx";
+import PotentialMatches from "./components/PotentialMatches.jsx";
+import Dashboard from "./components/Dashboard.jsx";
+import { profile } from "./util/api.js";
+import "./components/Profile.css";
+
+function ProtectedRoute({ isAuthenticated, loadingUser, children }) {
+  const location = useLocation();
+
+  if (loadingUser) {
+    return <div style={{ padding: "20px" }}>Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+
+  return children;
+}
 
 function App() {
-  const [page, setPage] = useState("login");
   const [user, setUser] = useState(null);
   const [loadingUser, setLoadingUser] = useState(true);
 
-  // test data for dev buttons
-  const [testInterests, setTestInterests] = useState([
-    "Gaming",
-    "Music",
-    "Travel",
-  ]);
-  const [testSkills, setTestSkills] = useState([
-    "React",
-    "JavaScript",
-    "CSS",
-  ]);
-
-  const navButtonStyle = {
-    padding: "5px",
-  };
+  const navigate = useNavigate();
 
   const normalizeUser = (u) => ({
     username: u?.username || "",
@@ -69,7 +75,7 @@ function App() {
       localStorage.setItem("username", normalizedUser.username);
 
       if (redirectToProfile) {
-        setPage("profile");
+        navigate("/potential-matches", { replace: true });
       }
     } catch (e) {
       console.error("Failed to load user profile:", e);
@@ -78,7 +84,7 @@ function App() {
       localStorage.removeItem("authToken");
       localStorage.removeItem("username");
       setUser(null);
-      setPage("login");
+      navigate("/login", { replace: true });
     } finally {
       setLoadingUser(false);
     }
@@ -91,15 +97,13 @@ function App() {
 
       if (!token) {
         setLoadingUser(false);
-        setPage("login");
         return;
       }
 
       if (savedUsername) {
-        await fetchUserProfile(savedUsername, true);
+        await fetchUserProfile(savedUsername, false);
       } else {
         setLoadingUser(false);
-        setPage("login");
       }
     };
 
@@ -110,186 +114,181 @@ function App() {
     localStorage.removeItem("authToken");
     localStorage.removeItem("username");
     setUser(null);
-    setPage("login");
     toast.success("Logged out successfully");
+    navigate("/login", { replace: true });
   };
-
-  if (loadingUser) {
-    return (
-      <>
-        <Toaster position="top-right" />
-        <div style={{ padding: "20px" }}>Loading...</div>
-      </>
-    );
-  }
 
   return (
     <>
       <Toaster position="top-right" />
 
-      {/* NAVIGATION */}
-      <div
-        style={{
-          padding: "10px 16px",
-          background: "#eee",
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-          width: "100%",
-          boxSizing: "border-box",
-        }}
-      >
-        {!isAuthenticated ? (
-          <>
-            <button
-              onClick={() => setPage("login")}
-              style={navButtonStyle}
-            >
-              Login
-            </button>
+      <header className="app-header">
+        <div className="app-header-inner">
+          {!isAuthenticated ? (
+            <div className="app-nav guest-nav">
+              <NavLink
+                to="/login"
+                className={({ isActive }) =>
+                  isActive ? "app-nav-link active" : "app-nav-link"
+                }
+              >
+                Login
+              </NavLink>
 
-            <button
-              onClick={() => setPage("signup")}
-              style={navButtonStyle}
-            >
-              Signup
-            </button>
-          </>
-        ) : (
-          <>
-            <button
-              onClick={() => setPage("profile")}
-              style={navButtonStyle}
-            >
-              My Profile
-            </button>
-
-            {/* keep these only if needed for dev testing */}
-            <button
-              onClick={() => setPage("profileView")}
-              style={navButtonStyle}
-            >
-              Test ProfileView
-            </button>
-
-            <button
-              onClick={() => setPage("testInterest")}
-              style={navButtonStyle}
-            >
-              Test Interests
-            </button>
-
-            <button
-              onClick={() => setPage("testMatches")}
-              style={navButtonStyle}
-            >
-              Test Matches
-            </button>
-
-            <button
-              onClick={() => setPage("testSkills")}
-              style={navButtonStyle}
-            >
-              Test Skills
-            </button>
-
-            <button
-              onClick={handleLogout}
-              style={{ ...navButtonStyle, marginLeft: "auto" }}
-            >
-              Logout
-            </button>
-          </>
-        )}
-      </div>
-
-      {/* PUBLIC PAGES */}
-      {!isAuthenticated && page === "login" && (
-        <Login
-          setUser={async (u) => {
-            if (u?.username) {
-              localStorage.setItem("username", u.username);
-              await fetchUserProfile(u.username, true);
-            } else {
-              toast.error("Username not found after login");
-            }
-          }}
-          goToSignup={() => setPage("signup")}
-        />
-      )}
-
-      {!isAuthenticated && page === "signup" && (
-        <Signup goToLogin={() => setPage("login")} />
-      )}
-
-      {/* PROTECTED PAGES */}
-      {isAuthenticated && page === "profile" && (
-        <>
-          <div
-            className="d-flex align-items-center"
-            style={{
-              width: "100%",
-              backgroundColor: "blue",
-              color: "white",
-              padding: "15px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxSizing: "border-box",
-            }}
-          >
-            <h1
-              style={{
-                margin: 0,
-                textAlign: "center",
-                fontWeight: "bold",
-              }}
-            >
-              Looking For Love Profile Editor
-            </h1>
-          </div>
-
-          {user ? (
-            <ProfileEdit user={user} setUser={setUser} />
+              <NavLink
+                to="/signup"
+                className={({ isActive }) =>
+                  isActive ? "app-nav-link active" : "app-nav-link"
+                }
+              >
+                Signup
+              </NavLink>
+            </div>
           ) : (
-            <div className="spinner">Loading profile...</div>
+            <div className="app-nav">
+              <NavLink
+                to="/profile"
+                className={({ isActive }) =>
+                  isActive ? "app-nav-link active" : "app-nav-link"
+                }
+              >
+                My Profile
+              </NavLink>
+
+              <NavLink
+                to="/potential-matches"
+                className={({ isActive }) =>
+                  isActive ? "app-nav-link active" : "app-nav-link"
+                }
+              >
+                Potential Matches
+              </NavLink>
+
+              <NavLink
+                to="/matches"
+                className={({ isActive }) =>
+                  isActive ? "app-nav-link active" : "app-nav-link"
+                }
+              >
+                Matches
+              </NavLink>
+
+              {user?.username == "Admin" && (
+                <NavLink
+                  to="/dashboard"
+                  className={({ isActive }) =>
+                    isActive ? "app-nav-link active" : "app-nav-link"
+                  }
+                >
+                Dashboard
+              </NavLink>)}
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="app-nav-link logout-btn"
+              >
+                Logout
+              </button>
+            </div>
           )}
-        </>
-      )}
-
-      {isAuthenticated && page === "profileView" && (
-        <ProfileView user={user} />
-      )}
-
-      {isAuthenticated && page === "testInterest" && (
-        <div>
-          {testInterests.map((interest) => (
-            <InterestDisplay
-              key={interest}
-              interest={interest}
-              setInterests={setTestInterests}
-            />
-          ))}
         </div>
-      )}
+      </header>
 
-      {isAuthenticated && page === "testSkills" && (
-        <div>
-          {testSkills.map((skill) => (
-            <SkillDisplay
-              key={skill}
-              skill={skill}
-              setSkills={setTestSkills}
-            />
-          ))}
-        </div>
-      )}
+      <Routes>
+        <Route
+          path="/"
+          element={
+            isAuthenticated ? (
+              <Navigate to="/potential-matches" replace />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
 
-      {isAuthenticated && page === "testMatches" && (
-        <div>
-          {<Matches user={user} />}
-        </div>
-      )}
+        <Route
+          path="/login"
+          element={
+            isAuthenticated ? (
+              <Navigate to="/potential-matches" replace />
+            ) : (
+              <Login
+                setUser={async (u) => {
+                  if (u?.username) {
+                    localStorage.setItem("username", u.username);
+                    await fetchUserProfile(u.username, true);
+                  } else {
+                    toast.error("Username not found after login");
+                  }
+                }}
+                goToSignup={() => navigate("/signup")}
+              />
+            )
+          }
+        />
+
+        <Route
+          path="/signup"
+          element={
+            isAuthenticated ? (
+              <Navigate to="/potential-matches" replace />
+            ) : (
+              <Signup goToLogin={() => navigate("/login")} />
+            )
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute
+              isAuthenticated={isAuthenticated}
+              loadingUser={loadingUser}
+            >
+              <ProfileView user={user} setUser={setUser} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/matches"
+          element={
+            <ProtectedRoute
+              isAuthenticated={isAuthenticated}
+              loadingUser={loadingUser}
+            >
+              <Matches user={user} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute
+              isAuthenticated={isAuthenticated}
+              loadingUser={loadingUser}
+            >
+              <Dashboard user={user} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/potential-matches"
+          element={
+            <ProtectedRoute
+              isAuthenticated={isAuthenticated}
+              loadingUser={loadingUser}
+            >
+              <PotentialMatches user={user} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </>
   );
 }

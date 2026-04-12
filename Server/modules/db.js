@@ -24,6 +24,10 @@ const updateDocument = (context, database, collection, criteria, updateData) => 
     return context.db(database).collection(collection).updateOne(criteria, { $set: updateData });
 }
 
+const updateDashboard = (context, database, collection, updateData) => {
+    return context.db(database).collection(collection).updateOne({dashboard: "dashboard"}, { $inc: updateData });
+}
+
 const findDocument = (context, database, collection, criteria, projection = { _id: 0 }) => {
     return context.db(database).collection(collection).findOne(criteria, { projection });
 }
@@ -49,6 +53,7 @@ export {
     insertDocument,
     insertDocuments,
     updateDocument,
+    updateDashboard,
     findDocument,
     findDocuments,
     deleteDocument,

@@ -126,7 +126,7 @@ const profile = {
 
 };
 const matches = {
-    async getMatches(username) {
+    async getPotentialMatches(username) {
         const token = localStorage.getItem('authToken');
         const res = await fetch(serverRoute(`profilesbyinterest/${username}`), {
             method: 'GET',
@@ -137,6 +137,84 @@ const matches = {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to fetch matches');
+        return data;
+    },
+    async requestMatch(senderUsername, receiverUsername) {
+        const token = localStorage.getItem("authToken");
+
+        const res = await fetch(serverRoute(`match/${senderUsername}/${receiverUsername}`), {
+            method: 'PUT',
+            headers: {
+                ...headers,
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        let data = null
+        try {
+            data = await res.json();
+        }
+        catch {
+            data = null;
+        }
+        if (!res.ok) {
+            throw new Error(data?.error || 'Failed to send match request')
+        }
+        return data;
+    },
+    async getMatches(username) {
+        const token = localStorage.getItem('authToken');
+
+        const res = await fetch(serverRoute(`matchingprofiles/${username}`), {
+            method: 'GET',
+            headers: {
+                ...headers,
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to fetch current matches');
+        return data;
+    },
+    async postReview(senderUsername, receiverUsername, review) {
+        const res = await fetch(serverRoute(`review/${senderUsername}/${receiverUsername}`), {
+            method: 'PUT',
+            headers: {
+                ...headers,
+            },
+            body: JSON.stringify({ review: review })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error('Failed to submit review');
+        return data;
+    },
+    async getReviews(senderUsername) {
+        const token = localStorage.getItem('authToken');
+        const res = await fetch(serverRoute(`review/${senderUsername}`), {
+            method: 'GET',
+            headers: {
+                ...headers,
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error('Failed to fetch reviews');
+        return data;
+    },
+    async getDashboardStats(adminPassword){
+        const token = localStorage.getItem('authToken');
+        const res = await fetch(serverRoute(`dashboard/${adminPassword}`), {
+            method: 'GET',
+            headers: {
+                ...headers,
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error('Failed to fetch reviews');
         return data;
     }
 }

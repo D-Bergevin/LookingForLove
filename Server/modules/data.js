@@ -6,6 +6,7 @@ const DATABASE_NAME = "LookingForLove";
 const PROFILE_TABLE = "profiles";
 const MATCH_TABLE = "matches";
 const REVIEW_TABLE = "reviews";
+const DASHBOARD_TABLE = "dashboard"
 const SALT_ROUNDS = 10;
 
 const retrieveProfiles = async () => {
@@ -55,8 +56,34 @@ const retrieveProfilesByInterest = async (userUsername) => {
             { _id: 0, passwordHash: 0 }
         );
 
+        let existingMatches = await db.findDocuments(
+            context,
+            DATABASE_NAME,
+            MATCH_TABLE,
+            { $or: [{initialSender: userProfile.username},
+                    {initialReceiver: userProfile.username, matched:"true"}]
+            }
+        );
+
+        let existingUsernames = existingMatches.map(match => {
+            if (!match) return null;
+
+            if (match.initialSender === userUsername)
+            {
+                return match.initialReceiver
+            }
+            else if (match.initialReceiver === userUsername)
+            {
+                return match.initialSender;
+            }
+            else return null;
+
+        }).filter(matchUsername => matchUsername !== null);
+
+
         let filteredProfiles = profiles.map(profile => {
             if (!profile) return null;
+            if (existingUsernames.includes(profile.username)) return null;
 
             if (userProfile.datingPreference !== "A" && userProfile.datingPreference !== profile.displayedGender)
             {
@@ -202,7 +229,66 @@ const retrieveProfile = async (profileUsername) => {
     return profile;
 };
 
+const retrieveContactInformation = async (profileUsername) => {
+    let contactInfo = null;
+    let context = undefined;
 
+    try {
+        context = await db.initDatabase(env.DB_URI);
+
+        let profile = await db.findDocument(
+            context,
+            DATABASE_NAME,
+            PROFILE_TABLE,
+            { username: profileUsername }
+        );
+
+        if (profile.email)
+        {
+            contactInfo = {email: profile.email};
+
+            let dashboardResult = await db.updateDashboard(
+            context,
+            DATABASE_NAME,
+            DASHBOARD_TABLE,
+            {numCommunicationShares: 1}
+            );
+        }
+    }
+    catch (e) {
+        console.error(e);
+    }
+    finally {
+        context?.close();
+    }
+
+    return contactInfo;
+};
+
+const retrieveDashboardStats = async () => {
+    let stats = null;
+    let context = undefined;
+
+    try {
+        context = await db.initDatabase(env.DB_URI);
+
+        stats = await db.findDocument(
+            context,
+            DATABASE_NAME,
+            DASHBOARD_TABLE,
+            { dashboard: "dashboard" },
+            { _id: 0, dashboard: 0 }
+        );
+    }
+    catch (e) {
+        console.error(e);
+    }
+    finally {
+        context?.close();
+    }
+
+    return stats;
+};
 
 const retrieveProfileByPrivacy = async (profileUsername) => {
     let profile = null;
@@ -309,6 +395,39 @@ const addNewProfile = async (profile) => {
                 PROFILE_TABLE,
                 profileToInsert
             );
+
+            let dashboardResult = null;
+
+            if (profileToInsert.membership)
+            {
+                if (profileToInsert.membership === "Paid")
+                {
+                    dashboardResult = await db.updateDashboard(
+                    context,
+                    DATABASE_NAME,
+                    DASHBOARD_TABLE,
+                    {numPaidMembers: 1}  
+                    );
+                }
+                else
+                {
+                    dashboardResult = await db.updateDashboard(
+                    context,
+                    DATABASE_NAME,
+                    DASHBOARD_TABLE,
+                    {numFreeMembers: 1}
+                    );
+                }
+            }
+            else
+            {
+                dashboardResult = await db.updateDashboard(
+                context,
+                DATABASE_NAME,
+                DASHBOARD_TABLE,
+                {numFreeMembers: 1}  
+                );
+            }
         }
         else {
             console.error("ERROR: Profile already exists.");
@@ -431,7 +550,6 @@ const updatePartialProfile = async (criteria, update) => {
     return result;
 };
 
-//WIP
 const matchProfiles = async (senderUsername, receiverUsername) => {
     let context = undefined;
     let result = undefined;
@@ -491,8 +609,15 @@ const matchProfiles = async (senderUsername, receiverUsername) => {
                         DATABASE_NAME,
                         MATCH_TABLE,
                         {initialSender: receiver.username, initialReceiver: sender.username},
-                        {$set: {matched: "true"}}
-                    );
+                        {matched: "true"}
+                        );
+
+                        let dashboardResult = await db.updateDashboard(
+                        context,
+                        DATABASE_NAME,
+                        DASHBOARD_TABLE,
+                        {numMatches: 1}  
+                        );
                     }
                     else
                     {
@@ -502,8 +627,8 @@ const matchProfiles = async (senderUsername, receiverUsername) => {
                             DATABASE_NAME,
                             MATCH_TABLE,
                             {
-                                initialSender: profile.username,
-                                initialReceiver: matchingProfile.username,
+                                initialSender: sender.username,
+                                initialReceiver: receiver.username,
                                 matched: "false"
                             }
                         );
@@ -538,7 +663,31 @@ const matchProfiles = async (senderUsername, receiverUsername) => {
     return result;
 };
 
-const reviewMatch = async (reviewerUsername, matchedUsername, reviewRating) => {
+const retrieveReviewsByUsername = async (username) => {
+    let reviews = [];
+    let context = undefined;
+    try{
+        context = await db.initDatabase(env.DB_URI);
+
+        reviews = await db.findDocuments(
+            context,
+            DATABASE_NAME,
+            REVIEW_TABLE,
+            { reviewer: username },
+            //{ _id: 0 }
+        );
+    }
+    catch (e) {
+        console.error(e);
+    }
+    finally {
+        context?.close();
+    }
+
+    return reviews;
+}
+
+const reviewMatch = async (reviewerUsername, matchedUsername, review) => {
     let context = undefined;
     let result = undefined;
 
@@ -565,42 +714,63 @@ const reviewMatch = async (reviewerUsername, matchedUsername, reviewRating) => {
         }
         else {
 
-            let matchExists = await db.findDocument(
-                context,
-                DATABASE_NAME,
-                MATCH_TABLE,
-                { $or: [{initialSender: reviewerProfile.username, initialReceiver: matchedProfile.username, matched: "true"},
-                    {initialSender: matchedProfile.username, initialReceiver: reviewerProfile.username, matched: "true"}] 
-                }
+            let alreadyReviewed = await db.findDocument(
+            context,
+            DATABASE_NAME,
+            REVIEW_TABLE,
+            {reviewer: reviewerProfile.username, matched: matchedProfile.username}
             );
 
-            if (matchExists)
+            if (alreadyReviewed)
             {
-                if (reviewRating > 5 || reviewRating < 1)
-                {
-                    //Rating not 1-5
-                    console.error("ERROR: Rating is not in between 1-5.");
-                    result = "Rating";
-                }
-                else
-                {
-                    result = await db.insertDocument(
+                result = await db.updateDocument(
                         context,
                         DATABASE_NAME,
                         REVIEW_TABLE,
-                        {
-                            reviewer: reviewerProfile.username,
-                            matched: matchedProfile.username,
-                            rating: reviewRating
-                        }
+                        {reviewer: reviewerProfile.username, matched: matchedProfile.username},
+                        {rating: review.rating, comment: review.comment}
                     );
-                }
             }
             else
             {
-                //Profiles not matched
-                console.error("ERROR: Profiles are not matched.");
-                result = "NotMatched";
+                let matchExists = await db.findDocument(
+                    context,
+                    DATABASE_NAME,
+                    MATCH_TABLE,
+                    { $or: [{initialSender: reviewerProfile.username, initialReceiver: matchedProfile.username, matched: "true"},
+                        {initialSender: matchedProfile.username, initialReceiver: reviewerProfile.username, matched: "true"}] 
+                    }
+                );
+
+                if (matchExists)
+                {
+                    if (review.rating > 5 || review.rating < 1)
+                    {
+                        //Rating not 1-5
+                        console.error("ERROR: Rating is not in between 1-5.");
+                        result = "Rating";
+                    }
+                    else
+                    {
+                        result = await db.insertDocument(
+                            context,
+                            DATABASE_NAME,
+                            REVIEW_TABLE,
+                            {
+                                reviewer: reviewerProfile.username,
+                                matched: matchedProfile.username,
+                                rating: review.rating,
+                                comment: review.comment
+                            }
+                        );
+                    }
+                }
+                else
+                {
+                    //Profiles not matched
+                    console.error("ERROR: Profiles are not matched.");
+                    result = "NotMatched";
+                }
             }
         }
     }
@@ -625,5 +795,8 @@ export {
     updatePartialProfile,
     matchProfiles,
     retreiveMatchedProfiles,
-    reviewMatch
+    reviewMatch,
+    retrieveReviewsByUsername,
+    retrieveContactInformation,
+    retrieveDashboardStats
 };
