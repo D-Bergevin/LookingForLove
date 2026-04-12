@@ -5,10 +5,17 @@ import env from "./env.js";
 import {
     retrieveProfiles,
     retrieveProfile,
+    retrieveProfileByPrivacy,
     addNewProfile,
     authenticateProfile,
     updatePartialProfile,
-    retrieveProfilesByInterest
+    retrieveProfilesByInterest,
+    matchProfiles,
+    retreiveMatchedProfiles,
+    reviewMatch,
+    retrieveReviewsByUsername,
+    retrieveContactInformation,
+    retrieveDashboardStats
 } from './data.js';
 
 // The Express application object
@@ -60,6 +67,11 @@ app.get('/profilesbyinterest/:username', authenticateToken, async (_request, res
     response.json(profiles);
 });
 
+app.get('/matchingprofiles/:username', authenticateToken, async (_request, response) => {
+    let profiles = await retreiveMatchedProfiles(_request.params.username);
+    response.json(profiles);
+});
+
 app.get('/profiles/:username', authenticateToken, async (request, response) => {
     try {
         const profileUsername = request.params.username;
@@ -78,9 +90,66 @@ app.get('/profiles/:username', authenticateToken, async (request, response) => {
     }
 });
 
+app.get('/contactinfo/:username', authenticateToken, async (request, response) => {
+    try {
+        const profileUsername = request.params.username;
+
+        let contactInfo = await retrieveContactInformation(profileUsername);
+
+        if (contactInfo) {
+            response.json(contactInfo);
+        } else {
+            response.status(404).json({ error: "Profile not found" });
+        }
+    }
+    catch (e) {
+        console.error(e);
+        response.sendStatus(500);
+    }
+});
+
+app.get('/dashboard/:password', authenticateToken, async (_request, response) => {
+    let adminPassword = _request.params.password;
+    let stats = null;
+    if (adminPassword)
+    {
+        if (adminPassword === "group6adminpassword")
+        {
+            stats = await retrieveDashboardStats();
+        }
+        else
+        {
+            response.status(500).json({ error: "Incorrect password." });
+        }
+    }
+    else
+    {
+        response.status(500).json({ error: "Incorrect password." });
+    }
+    
+    response.json(stats);
+});
+
+app.get('/profilesbyprivacy/:username', authenticateToken, async (request, response) => {
+    try {
+        const profileUsername = request.params.username;
+
+        let profile = await retrieveProfileByPrivacy(profileUsername);
+
+        if (profile) {
+            response.json(profile);
+        } else {
+            response.status(404).json({ error: "Profile not found" });
+        }
+    }
+    catch (e) {
+        console.error(e);
+        response.sendStatus(500);
+    }
+});
+
 app.post('/register', async (request, response) => {
     const newProfile = request.body;
-
     try {
         let result = await addNewProfile(newProfile);
 
@@ -166,6 +235,78 @@ app.put('/update', authenticateToken, async (request, response) => {
         response.sendStatus(500);
     }
 });
+
+app.put('/match/:senderUsername/:receiverUsername', async (request, response) => {
+
+    try {
+        const result = await matchProfiles(request.params.senderUsername, request.params.receiverUsername);
+
+        if (result === "NotFound") {
+            response.sendStatus(404);
+        }
+        else if (result === "Matched") {
+            response.sendStatus(409);
+        }
+        else if (result === "AlreadySent") {
+            response.sendStatus(400);
+        }
+        else {
+            response.json(result);
+        }
+    }
+    catch (e) {
+        console.error(e);
+        response.sendStatus(500);
+    }
+});
+
+app.put('/review/:reviewerUsername/:matchedUsername', async (request, response) => {
+    let review = request.body.review;
+
+    if (!review) {
+        return response.status(400).send("Missing review");
+    }
+
+    try {
+        const result = await reviewMatch(request.params.reviewerUsername, request.params.matchedUsername, review);
+
+        if (result === "NotFound") {
+            response.sendStatus(404);
+        }
+        else if (result === "NotMatched") {
+            response.sendStatus(409);
+        }
+        else if (result === "Rating") {
+            response.sendStatus(400);
+        }
+        else {
+            response.json(result);
+        }
+    }
+    catch (e) {
+        console.error(e);
+        response.sendStatus(500);
+    }
+});
+
+app.get('/review/:senderUsername', authenticateToken, async (request, response) => {
+    try {
+        const senderUsername = request.params.senderUsername;
+
+        let reviews = await retrieveReviewsByUsername(senderUsername);
+
+        if (reviews) {
+            response.json(reviews);
+        } else {
+            response.status(404).json({ error: "Reviews not found" });
+        }
+    }
+    catch (e) {
+        console.error(e);
+        response.sendStatus(500);
+    }
+});
+
 
 const startServer = (port) => {
     app.listen(port, () => console.warn(`Listening on port ${port}`));
