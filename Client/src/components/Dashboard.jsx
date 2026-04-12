@@ -3,16 +3,19 @@ import { useState } from "react";
 import * as api from "../util/api.js";
 
 function Dashboard(props) {
+    const [passwordWrong, setPasswordWrong] = useState(false);
     const [loading, setLoading] = useState(false);
     const [password, setPassword] = useState("");
     const [showPassword] = useState(false);
     const [analytics, setAnalytics] = useState(null);
     const getAnalytics = async () => {
         setLoading(true);
-        const data = await api.profile.getDashboardStats(password);
-        console.log("Analytics data:", data);
+        const data = await api.matches.getDashboardStats(password);
         setAnalytics(data);
         setLoading(false);
+        if (!data) {
+            setPasswordWrong(true);
+        }
     };
     if (!props.user || loading) {
         return <div>Loading...</div>
@@ -21,10 +24,10 @@ function Dashboard(props) {
         return (
             <div className="matches_container">
                 <h2>Analytics</h2>
-                <p>Total Users: {analytics.numFreeMembers || 0}</p>
-                <p>Total Matches: {analytics.numPaidMembers || 0}</p>
-                <p>Average Matches per User: {analytics.numMatches || 0}</p>
-                <p>Most Common Interest: {analytics.numCommunicationShares || 0}</p>
+                <p>Free Users: {analytics.numFreeMembers || 0}</p>
+                <p>Paid Users: {analytics.numPaidMembers || 0}</p>
+                <p>Number of user matches: {analytics.numMatches || 0}</p>
+                <p>Amount of communications shared: {analytics.numCommunicationShares || 0}</p>
             </div>
         );
     }
@@ -43,6 +46,7 @@ function Dashboard(props) {
             <button type="button" onClick={getAnalytics}>
                 Get Analytics
             </button>
+            {passwordWrong && <p style={{color: "red"}}>Incorrect password or failed to load analytics.</p>}
         </div>
     );
 }
