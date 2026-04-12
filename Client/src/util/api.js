@@ -205,13 +205,12 @@ const matches = {
     },
     async getDashboardStats(adminPassword){
         const token = localStorage.getItem('authToken');
-        const res = await fetch(serverRoute(`dashboard`), {
+        const res = await fetch(serverRoute(`dashboard/${adminPassword}`), {
             method: 'GET',
             headers: {
                 ...headers,
                 'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ password: adminPassword })
+            }
         });
 
         const data = await res.json();

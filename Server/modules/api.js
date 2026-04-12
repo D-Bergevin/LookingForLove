@@ -108,8 +108,8 @@ app.get('/contactinfo/:username', authenticateToken, async (request, response) =
     }
 });
 
-app.get('/dashboard', authenticateToken, async (_request, response) => {
-    let adminPassword = _request.body.password;
+app.get('/dashboard/:password', authenticateToken, async (_request, response) => {
+    let adminPassword = _request.params.password;
     let stats = null;
     if (adminPassword)
     {
