@@ -90,6 +90,7 @@ button:hover {
 .star:hover {
     color: blueviolet;
 }
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -148,9 +149,11 @@ button:hover {
   gap: 10px;
   justify-content: flex-end;
 }
+
 .profile-text-center {
     text-align: center;
 }
+
 .match-actions {
   display: flex;
   gap: 8px;
@@ -159,4 +162,81 @@ button:hover {
 
 .contact-info-list p {
   margin: 8px 0;
+}
+
+/* Header styles only */
+.app-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #dcdcdc;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.app-header-inner {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px 20px;
+  box-sizing: border-box;
+}
+
+.app-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.guest-nav {
+  justify-content: flex-end;
+}
+
+.app-nav-link {
+  display: inline-block;
+  padding: 10px 14px;
+  background-color: darksalmon;
+  color: white;
+  text-decoration: none;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.2;
+  margin-top: 0;
+}
+
+.app-nav-link:hover {
+  background-color: deeppink;
+  color: white;
+}
+
+.app-nav-link.active,
+.app-nav-link[aria-current="page"] {
+  background-color: mediumvioletred;
+  color: white;
+  font-weight: bold;
+}
+
+.logout-btn {
+  margin-left: auto;
+  margin-top: 0;
+}
+
+@media (max-width: 768px) {
+  .app-header-inner {
+    padding: 10px 12px;
+  }
+
+  .app-nav {
+    gap: 8px;
+  }
+
+  .guest-nav {
+    justify-content: flex-end;
+  }
+
+  .logout-btn {
+    margin-left: 0;
+  }
 }
