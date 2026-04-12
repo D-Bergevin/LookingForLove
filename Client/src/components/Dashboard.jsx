@@ -9,10 +9,13 @@ function Dashboard(props) {
     const [showPassword] = useState(false);
     const [analytics, setAnalytics] = useState(null);
     const getAnalytics = async () => {
+        let data;
+        if(password!==""){
         setLoading(true);
-        const data = await api.matches.getDashboardStats(password);
+        data = await api.matches.getDashboardStats(password);
         setAnalytics(data);
         setLoading(false);
+        }
         if (!data) {
             setPasswordWrong(true);
         }
