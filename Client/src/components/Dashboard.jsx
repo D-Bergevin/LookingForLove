@@ -20,8 +20,11 @@ function Dashboard(props) {
     if(analytics!==null) {
         return (
             <div className="matches_container">
-                <h1>Analytics</h1>
-                <pre>{JSON.stringify(analytics, null, 2)}</pre>
+                <h2>Analytics</h2>
+                <p>Total Users: {analytics.numFreeMembers || 0}</p>
+                <p>Total Matches: {analytics.numPaidMembers || 0}</p>
+                <p>Average Matches per User: {analytics.numMatches || 0}</p>
+                <p>Most Common Interest: {analytics.numCommunicationShares || 0}</p>
             </div>
         );
     }
