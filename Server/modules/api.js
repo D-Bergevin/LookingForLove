@@ -109,7 +109,20 @@ app.get('/contactinfo/:username', authenticateToken, async (request, response) =
 });
 
 app.get('/dashboard', authenticateToken, async (_request, response) => {
-    let stats = await retrieveDashboardStats();
+    let adminPassword = _request.body.password;
+    let stats = null;
+    if (adminPassword)
+    {
+        if (adminPassword === "group6adminpassword")
+        {
+            stats = await retrieveDashboardStats();
+        }
+    }
+    else
+    {
+        response.status(500).json({ error: "Incorrect password." });
+    }
+    
     response.json(stats);
 });
 

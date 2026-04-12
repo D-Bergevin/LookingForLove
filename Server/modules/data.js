@@ -247,7 +247,7 @@ const retrieveContactInformation = async (profileUsername) => {
         {
             contactInfo = {email: profile.email};
 
-            dashboardResult = await db.updateDashboard(
+            let dashboardResult = await db.updateDashboard(
             context,
             DATABASE_NAME,
             DASHBOARD_TABLE,

@@ -216,6 +216,21 @@ const matches = {
         const data = await res.json();
         if (!res.ok) throw new Error('Failed to fetch reviews');
         return data;
+    },
+    async getDashboardStats(adminPassword){
+        const token = localStorage.getItem('authToken');
+        const res = await fetch(serverRoute(`dashboard`), {
+            method: 'GET',
+            headers: {
+                ...headers,
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ password: adminPassword })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error('Failed to fetch reviews');
+        return data;
     }
 }
 
