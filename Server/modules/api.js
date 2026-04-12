@@ -117,6 +117,10 @@ app.get('/dashboard/:password', authenticateToken, async (_request, response) =>
         {
             stats = await retrieveDashboardStats();
         }
+        else
+        {
+            response.status(500).json({ error: "Incorrect password." });
+        }
     }
     else
     {
