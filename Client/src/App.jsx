@@ -14,6 +14,7 @@ import Login from "./components/Login";
 import Signup from "./components/Signup";
 import ProfileView from "./components/ProfileView.jsx";
 import PotentialMatches from "./components/PotentialMatches.jsx";
+import Dashboard from "./components/Dashboard.jsx";
 import { profile } from "./util/api.js";
 import "./components/Profile.css";
 
@@ -160,7 +161,7 @@ function App() {
                   isActive ? "app-nav-link active" : "app-nav-link"
                 }
               >
-                Test Potential Matches
+                Potential Matches
               </NavLink>
 
               <NavLink
@@ -169,8 +170,18 @@ function App() {
                   isActive ? "app-nav-link active" : "app-nav-link"
                 }
               >
-                Test Matches
+                Matches
               </NavLink>
+
+              {user?.username == "Admin" && (
+                <NavLink
+                  to="/dashboard"
+                  className={({ isActive }) =>
+                    isActive ? "app-nav-link active" : "app-nav-link"
+                  }
+                >
+                Dashboard
+              </NavLink>)}
 
               <button
                 type="button"
@@ -248,6 +259,18 @@ function App() {
               loadingUser={loadingUser}
             >
               <Matches user={user} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute
+              isAuthenticated={isAuthenticated}
+              loadingUser={loadingUser}
+            >
+              <Dashboard user={user} />
             </ProtectedRoute>
           }
         />
