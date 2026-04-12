@@ -4,7 +4,7 @@ import {
   Routes,
   Route,
   Navigate,
-  Link,
+  NavLink,
   useNavigate,
   useLocation,
 } from "react-router";
@@ -18,6 +18,7 @@ import InterestDisplay from "./components/InterestDisplay.jsx";
 import SkillDisplay from "./components/SkillDisplay.jsx";
 import PotentialMatches from "./components/PotentialMatches.jsx";
 import { profile } from "./util/api.js";
+import "./components/ProfileTest.css";
 
 function ProtectedRoute({ isAuthenticated, loadingUser, children }) {
   const location = useLocation();
@@ -50,10 +51,6 @@ function App() {
   ]);
 
   const navigate = useNavigate();
-
-  const navButtonStyle = {
-    padding: "5px",
-  };
 
   const normalizeUser = (u) => ({
     username: u?.username || "",
@@ -92,7 +89,7 @@ function App() {
       localStorage.setItem("username", normalizedUser.username);
 
       if (redirectToProfile) {
-        navigate("/profile", { replace: true });
+        navigate("/potential-matches", { replace: true });
       }
     } catch (e) {
       console.error("Failed to load user profile:", e);
@@ -139,99 +136,95 @@ function App() {
     <>
       <Toaster position="top-right" />
 
-      <div
-        style={{
-          padding: "10px 16px",
-          background: "#eee",
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-          width: "100%",
-          boxSizing: "border-box",
-        }}
-      >
-        {!isAuthenticated ? (
-          <>
-            <Link to="/login">
-              <button type="button" style={navButtonStyle}>
+      <header className="app-header">
+        <div className="app-header-inner">
+          {!isAuthenticated ? (
+            <div className="app-nav guest-nav">
+              <NavLink
+                to="/login"
+                className={({ isActive }) =>
+                  isActive ? "app-nav-link active" : "app-nav-link"
+                }
+              >
                 Login
-              </button>
-            </Link>
+              </NavLink>
 
-            <Link to="/signup">
-              <button type="button" style={navButtonStyle}>
+              <NavLink
+                to="/signup"
+                className={({ isActive }) =>
+                  isActive ? "app-nav-link active" : "app-nav-link"
+                }
+              >
                 Signup
-              </button>
-            </Link>
-          </>
-        ) : (
-          <>
-            <Link to="/profile">
-              <button type="button" style={navButtonStyle}>
+              </NavLink>
+            </div>
+          ) : (
+            <div className="app-nav">
+              <NavLink
+                to="/profile"
+                className={({ isActive }) =>
+                  isActive ? "app-nav-link active" : "app-nav-link"
+                }
+              >
                 My Profile
-              </button>
-            </Link>
+              </NavLink>
 
-            <Link to="/profile-view">
-              <button type="button" style={navButtonStyle}>
+              <NavLink
+                to="/profile-view"
+                className={({ isActive }) =>
+                  isActive ? "app-nav-link active" : "app-nav-link"
+                }
+              >
                 Test ProfileView
-              </button>
-            </Link>
+              </NavLink>
 
-            {/* <Link to="/interests">
-              <button type="button" style={navButtonStyle}>
-                Test Interests
-              </button>
-            </Link> */}
-
-            <Link to="/potential-matches">
-              <button type="button" style={navButtonStyle}>
+              <NavLink
+                to="/potential-matches"
+                className={({ isActive }) =>
+                  isActive ? "app-nav-link active" : "app-nav-link"
+                }
+              >
                 Test Potential Matches
-              </button>
-            </Link>
+              </NavLink>
 
-            <Link to="/matches">
-              <button type="button" style={navButtonStyle}>
+              <NavLink
+                to="/matches"
+                className={({ isActive }) =>
+                  isActive ? "app-nav-link active" : "app-nav-link"
+                }
+              >
                 Test Matches
-              </button>
-            </Link>
+              </NavLink>
 
-            {/* <Link to="/skills">
-              <button type="button" style={navButtonStyle}>
-                Test Skills
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="app-nav-link logout-btn"
+              >
+                Logout
               </button>
-            </Link> */}
-
-            <button
-              type="button"
-              onClick={handleLogout}
-              style={{ ...navButtonStyle, marginLeft: "auto" }}
-            >
-              Logout
-            </button>
-          </>
-        )}
-      </div>
+            </div>
+          )}
+        </div>
+      </header>
 
       <Routes>
-        {/* default route */}
         <Route
           path="/"
           element={
             isAuthenticated ? (
-              <Navigate to="/profile" replace />
+              <Navigate to="/potential-matches" replace />
             ) : (
               <Navigate to="/login" replace />
             )
           }
         />
 
-        {/* public */}
         <Route
           path="/login"
           element={
             isAuthenticated ? (
-              <Navigate to="/profile" replace />
+              <Navigate to="/potential-matches" replace />
             ) : (
               <Login
                 setUser={async (u) => {
@@ -252,14 +245,13 @@ function App() {
           path="/signup"
           element={
             isAuthenticated ? (
-              <Navigate to="/profile" replace />
+              <Navigate to="/potential-matches" replace />
             ) : (
               <Signup goToLogin={() => navigate("/login")} />
             )
           }
         />
 
-        {/* protected */}
         <Route
           path="/profile"
           element={
@@ -378,7 +370,6 @@ function App() {
           }
         />
 
-        {/* fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
