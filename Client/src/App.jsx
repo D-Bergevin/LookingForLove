@@ -155,15 +155,6 @@ function App() {
               </NavLink>
 
               <NavLink
-                to="/profile-view"
-                className={({ isActive }) =>
-                  isActive ? "app-nav-link active" : "app-nav-link"
-                }
-              >
-                Test ProfileView
-              </NavLink>
-
-              <NavLink
                 to="/potential-matches"
                 className={({ isActive }) =>
                   isActive ? "app-nav-link active" : "app-nav-link"

@@ -49,7 +49,7 @@ function Signup({ goToLogin }) {
         goToLogin();
       }
     
-    } catch (e) {
+    } catch {
       toast.error("Signup failed - Duplicate email or username");
     }
 
