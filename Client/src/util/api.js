@@ -126,6 +126,25 @@ const profile = {
 
 };
 const matches = {
+    async getMutualMatchContact(username) {
+        const token = localStorage.getItem("authToken");
+
+        const res = await fetch(serverRoute(`contactinfo/${username}`), {
+            method: "GET",
+            headers: {
+                ...headers,
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.error || "Failed to fetch contact info");
+        }
+
+        return data;
+    },
     async getPotentialMatches(username) {
         const token = localStorage.getItem('authToken');
         const res = await fetch(serverRoute(`profilesbyinterest/${username}`), {

@@ -110,6 +110,7 @@ function PotentialMatches({ user }) {
                 <td>{profile.displayedGender || "N/A"}</td>
                 <td>
                   {[
+                    profile.location?.address,
                     profile.location?.city,
                     profile.location?.region,
                     profile.location?.country,
